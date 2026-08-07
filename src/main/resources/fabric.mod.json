@@ -1,0 +1,35 @@
+{
+    "schemaVersion": 1,
+    "id": "tracecraft",
+    "version": "${version}",
+    "name": "Tracecraft",
+    "description": "A strictly AMD RDNA4/FSR4 optimized Minecraft renderer.",
+    "authors": [
+        "Voidfilio"
+    ],
+    "contact": {
+        "homepage": "https://www.minecraft-tracecraft.com/",
+        "sources": "https://github.com/Minecraft-Tracecraft/Tracecraft",
+        "issues": "https://github.com/Minecraft-Tracecraft/Tracecraft/issues"
+    },
+    "license": "GPL-3.0",
+    "icon": "assets/tracecraft/icon.png",
+    "environment": "client",
+    "entrypoints": {
+        "client": [
+            "com.tracecraft.client.TracecraftClient"
+        ],
+        "main": [
+            "com.tracecraft.Tracecraft"
+        ]
+    },
+    "mixins": [
+        "tracecraft.mixins.json"
+    ],
+    "depends": {
+        "fabricloader": ">=${loader_version}",
+        "fabric": "*",
+        "minecraft": "${minecraft_version}"
+    },
+    "accessWidener": "tracecraft.accesswidener"
+}
