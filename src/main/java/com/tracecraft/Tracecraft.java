@@ -1,5 +1,6 @@
 package com.tracecraft;
 
+import com.tracecraft.mixin_related.MixinPlugin;
 import net.fabricmc.api.ModInitializer;
 
 public class Tracecraft implements ModInitializer {
@@ -8,5 +9,6 @@ public class Tracecraft implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        MixinPlugin.log("Tracecraft ModInitializer onInitialize() invocado exitosamente.");
     }
 }
