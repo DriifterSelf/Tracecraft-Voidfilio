@@ -59,8 +59,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $hash = git rev-parse --short HEAD
-          gh release create "build-${{ github.run_number }}" 
-            "${{ steps.mod_jar.outputs.path }}" 
-            --title "Tracecraft Build #${{ github.run_number }}" 
-            --notes "Automated mod build from $hash" 
-            --latest
+          $jarPath = "${{ steps.mod_jar.outputs.path }}"
+          gh release create "build-${{ github.run_number }}" "$jarPath" --title "Tracecraft Build #${{ github.run_number }}" --notes "Automated mod build from $hash" --latest
