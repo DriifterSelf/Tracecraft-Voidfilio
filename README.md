@@ -19,4 +19,5 @@ Gracias a la naturaleza abierta de la tecnología de AMD, **no necesitas descarg
 
 ## Disclaimer
 
-* NO AFILIADO A NVIDIA. **Tracecraft es una declaración a favor del Open Source y el hardware AMD.**
+* Este proyecto no está afiliado con Mojang o Microsoft.
+* **Runs best on AMD Radeon™ Graphics.**
