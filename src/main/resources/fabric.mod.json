@@ -28,8 +28,10 @@
     ],
     "depends": {
         "fabricloader": ">=${loader_version}",
-        "fabric": "*",
         "minecraft": "${minecraft_version}"
+    },
+    "suggests": {
+        "fabric": "*"
     },
     "accessWidener": "tracecraft.accesswidener"
 }
