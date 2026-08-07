@@ -70,22 +70,28 @@ public class TracecraftClient implements ClientModInitializer {
                 MixinPlugin.log("Sistema operativo no soportado nativamente: " + osName);
             }
 
-            // shaders & modules
+            // Shaders y módulos
             Path shaderTargetPath = tracecraftDir.resolve("shaders");
             copyFolderFromResource(shaderTargetPath, Path.of("shaders"));
 
             Path moduleTargetPath = tracecraftDir.resolve("modules");
             copyFolderFromResource(moduleTargetPath, Path.of("modules"));
 
-            // Safe native call initialization
+            // Inicialización protegida de bibliotecas nativas
             if (dllTargetPath != null && Files.exists(dllTargetPath)) {
                 try {
                     System.load(dllTargetPath.toAbsolutePath().toString());
                     MixinPlugin.log("Biblioteca nativa C++ Vulkan cargada exitosamente: " + dllTargetPath);
-                    RendererProxy.initFolderPath(tracecraftDir.toAbsolutePath().toString());
-                    Pipeline.initFolderPath(tracecraftDir);
-                    Options.readOptions();
-                    Pipeline.reloadAllModuleEntries();
+                    try {
+                        RendererProxy.initFolderPath(tracecraftDir.toAbsolutePath().toString());
+                        Pipeline.initFolderPath(tracecraftDir);
+                        Options.readOptions();
+                        Pipeline.reloadAllModuleEntries();
+                    } catch (Throwable t) {
+                        MixinPlugin.logError("Error al configurar RendererProxy/Pipeline", t);
+                    }
+                } catch (UnsatisfiedLinkError e) {
+                    MixinPlugin.logError("Dependencia nativa no encontrada al cargar " + dllTargetPath + ". Continuando en modo compatible.", e);
                 } catch (Throwable t) {
                     MixinPlugin.logError("No se pudieron inicializar llamadas nativas C++ Vulkan en: " + dllTargetPath, t);
                 }
