@@ -1,0 +1,66 @@
+﻿name: Build Tracecraft
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: build-tracecraft
+  cancel-in-progress: true
+
+jobs:
+  build-jar:
+    runs-on: [self-hosted, windows]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          clean: false
+          fetch-depth: 20
+
+      - name: Configure Git safe directory
+        shell: powershell
+        run: git config --global --add safe.directory '*'
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build Mod JAR
+        shell: powershell
+        run: .\gradlew.bat clean build --no-daemon
+
+      - name: Verify JAR
+        id: mod_jar
+        shell: powershell
+        run: |
+          $jar = Get-ChildItem build\libs -Filter "*-26.2.jar" | Select-Object -First 1
+          if (-not $jar) {
+            $jar = Get-ChildItem build\libs -Filter "*.jar" | Where-Object { $_.Name -notmatch "-sources|-dev" } | Select-Object -First 1
+          }
+          if (-not $jar) {
+            Write-Host "[FAIL] MOD JAR BUILD FAILED"
+            exit 1
+          }
+          $mb = [math]::Round($jar.Length / 1MB, 1)
+          Write-Host "[OK] JAR: $($jar.Name) (${mb}MB)"
+          "path=$($jar.FullName)" >> $env:GITHUB_OUTPUT
+          "name=$($jar.Name)" >> $env:GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $hash = git rev-parse --short HEAD
+          gh release create "build-${{ github.run_number }}" 
+            "${{ steps.mod_jar.outputs.path }}" 
+            --title "Tracecraft Build #${{ github.run_number }}" 
+            --notes "Automated mod build from $hash" 
+            --latest
