@@ -18,14 +18,15 @@ public enum UnsafeManager {
             f.setAccessible(true);
             return (Unsafe) f.get(null);
         } catch (Throwable t) {
-            throw new IllegalStateException(
-                "Cannot access sun.misc.Unsafe. On Java 17+, add JVM arg: "
-                    + "--add-opens=java.base/sun.misc=ALL-UNNAMED", t);
+            return null;
         }
     }
 
     @SuppressWarnings("unchecked")
     public <T> T allocateInstance(Class<T> cls) {
+        if (unsafe == null) {
+            throw new UnsupportedOperationException("Unsafe no disponible en este entorno JVM.");
+        }
         try {
             return (T) unsafe.allocateInstance(cls);
         } catch (InstantiationException e) {
