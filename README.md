@@ -1,4 +1,4 @@
-﻿<p align="center">
+<p align="center">
   <h1 align="center">Tracecraft (by Voidfilio)</h1>
 </p>
 
@@ -63,4 +63,4 @@ Gracias a la naturaleza abierta de esta tecnología, **no necesitas descargar li
 ## Disclaimer
 
 * Este proyecto no está afiliado con Mojang o Microsoft.
-* **Runs best on AMD Radeon™ Graphics.**
+* **Engineered exclusively for the AMD Radeon™ RX 9000 Series Flagship (RDNA4).**

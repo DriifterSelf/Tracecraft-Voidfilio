@@ -18,7 +18,7 @@ public class RendererProxy {
         String mapped = System.mapLibraryName("glfw");
         String[] candidates = {mapped, "libglfw.so.3", "libglfw.3.dylib", "glfw3.dll"};
         RendererProxy.initRenderer(candidates, window.getHandle());
-        RenderSystem.apiDescription = "Vulkan 1.4";
+        RenderSystem.apiDescription = "Vulkan 1.4.357 Bleeding Edge (AMD Radeon RX 9000 Series Flagship Max Performance Engine)";
     }
 
     public static native int maxSupportedTextureSize();

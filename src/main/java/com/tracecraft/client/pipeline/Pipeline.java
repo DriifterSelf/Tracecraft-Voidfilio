@@ -131,37 +131,10 @@ public class Pipeline {
     }
 
     public static boolean isPresetAvailable(String presetName) {
-        if (Objects.equals(presetName, Presets.RT_DLSSRR.key)) {
+        if (Objects.equals(presetName, Presets.ULTIMATE_RT_FSR4.key)) {
             return areModulesAvailable(
                     RAY_TRACING_MODULE_NAME,
-                    DLSS_MODULE_NAME,
-                    TONE_MAPPING_MODULE_NAME,
-                    POST_RENDER_MODULE_NAME);
-        }
-
-        if (Objects.equals(presetName, Presets.RT_NRD.key)) {
-            return areModulesAvailable(
-                    RAY_TRACING_MODULE_NAME,
-                    NRD_MODULE_NAME,
-                    TEMPORAL_ACCUMULATION_MODULE_NAME,
-                    TONE_MAPPING_MODULE_NAME,
-                    POST_RENDER_MODULE_NAME);
-        }
-
-        if (Objects.equals(presetName, Presets.RT_NRD_FSR.key)) {
-            return areModulesAvailable(
-                    RAY_TRACING_MODULE_NAME,
-                    NRD_MODULE_NAME,
                     FSR3_MODULE_NAME,
-                    TONE_MAPPING_MODULE_NAME,
-                    POST_RENDER_MODULE_NAME);
-        }
-
-        if (Objects.equals(presetName, Presets.RT_NRD_XESS.key)) {
-            return areModulesAvailable(
-                    RAY_TRACING_MODULE_NAME,
-                    NRD_MODULE_NAME,
-                    XESS_MODULE_NAME,
                     TONE_MAPPING_MODULE_NAME,
                     POST_RENDER_MODULE_NAME);
         }
@@ -170,17 +143,8 @@ public class Pipeline {
     }
 
     private static String getBestAvailablePresetName() {
-        if (isPresetAvailable(Presets.RT_NRD_FSR.key)) {
-            return Presets.RT_NRD_FSR.key;
-        }
-        if (isPresetAvailable(Presets.RT_NRD_XESS.key)) {
-            return Presets.RT_NRD_XESS.key;
-        }
-        if (isPresetAvailable(Presets.RT_NRD.key)) {
-            return Presets.RT_NRD.key;
-        }
-        if (isPresetAvailable(Presets.RT_DLSSRR.key)) {
-            return Presets.RT_DLSSRR.key;
+        if (isPresetAvailable(Presets.ULTIMATE_RT_FSR4.key)) {
+            return Presets.ULTIMATE_RT_FSR4.key;
         }
         return null;
     }

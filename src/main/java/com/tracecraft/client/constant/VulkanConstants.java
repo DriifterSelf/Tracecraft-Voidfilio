@@ -11,6 +11,106 @@ import org.lwjgl.opengl.GL33;
 
 public class VulkanConstants {
 
+    // Vulkan 1.4.357 API Specification & AMD RDNA4 Hardware Extensions (AMD Radeon RX 9000 Series Flagship)
+    public static final String VULKAN_API_VERSION = "Vulkan 1.4.357";
+    public static final String AMD_GPU_TARGET_PROFILE = "AMD Radeon RX 9000 Series Flagship (RDNA4)";
+    public static final boolean RDNA4_FLAGSHIP_ULTIMATE_MODE = true;
+    public static final String VK_AMD_WAVE_LIMITS_EXTENSION_NAME = "VK_AMD_wave_limits";
+    public static final String VK_AMD_DEVICE_COHERENT_MEMORY_EXTENSION_NAME = "VK_AMD_device_coherent_memory";
+    public static final String VK_AMD_SHADER_CORE_PROPERTIES_2_EXTENSION_NAME = "VK_AMD_shader_core_properties2";
+    public static final String VK_AMD_RASTERIZATION_ORDER_EXTENSION_NAME = "VK_AMD_rasterization_order";
+    public static final String VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME = "VK_KHR_ray_tracing_pipeline";
+    public static final String VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME = "VK_KHR_acceleration_structure";
+    public static final String VK_EXT_MESH_SHADER_EXTENSION_NAME = "VK_EXT_mesh_shader";
+    public static final String VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME = "VK_KHR_push_descriptor";
+    public static final String VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME = "VK_KHR_buffer_device_address";
+    public static final String VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME = "VK_EXT_extended_dynamic_state3";
+    public static final String VK_KHR_DYNAMIC_RENDERING_LOCAL_READ_EXTENSION_NAME = "VK_KHR_dynamic_rendering_local_read";
+
+    public enum VkMemoryAllocateFlagBits {
+        VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT(0x00000002),
+        VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_CAPTURE_REPLAY_BIT(0x00000004);
+
+        private final int value;
+        VkMemoryAllocateFlagBits(int value) { this.value = value; }
+        public int getValue() { return value; }
+    }
+
+    public enum VkRdna4WaveModeAMD {
+        WAVE32_MODE_AMD(32),
+        WAVE64_MODE_AMD(64);
+
+        private final int wavefrontSize;
+        VkRdna4WaveModeAMD(int wavefrontSize) { this.wavefrontSize = wavefrontSize; }
+        public int getWavefrontSize() { return wavefrontSize; }
+    }
+
+    public enum VkRdna4MemoryCoherenceAMD {
+        VK_MEMORY_PROPERTY_DEVICE_COHERENT_BIT_AMD(0x00000040),
+        VK_MEMORY_PROPERTY_DEVICE_UNCACHED_BIT_AMD(0x00000080);
+
+        private final int value;
+        VkRdna4MemoryCoherenceAMD(int value) { this.value = value; }
+        public int getValue() { return value; }
+    }
+
+    // Vulkan 1.4 Synchronization2 Flags (Vulkan 1.3/1.4 Core Specification)
+    public enum VkPipelineStageFlags2 {
+        VK_PIPELINE_STAGE_2_NONE(0L),
+        VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT(0x00000001L),
+        VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT(0x00000002L),
+        VK_PIPELINE_STAGE_2_VERTEX_ATTRIBUTE_INPUT_BIT(0x00000004L),
+        VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT(0x00000008L),
+        VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT(0x00000080L),
+        VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT(0x00000100L),
+        VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT(0x00000200L),
+        VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT(0x00000400L),
+        VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT(0x00000800L),
+        VK_PIPELINE_STAGE_2_TRANSFER_BIT(0x00001000L),
+        VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT(0x00002000L),
+        VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT(0x00008000L),
+        VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT(0x00010000L),
+        VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR(0x00200000L),
+        VK_PIPELINE_STAGE_2_ACCELERATION_STRUCTURE_BUILD_BIT_KHR(0x02000000L);
+
+        private final long value;
+        VkPipelineStageFlags2(long value) { this.value = value; }
+        public long getValue() { return value; }
+    }
+
+    public enum VkAccessFlags2 {
+        VK_ACCESS_2_NONE(0L),
+        VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT(0x00000001L),
+        VK_ACCESS_2_INDEX_READ_BIT(0x00000002L),
+        VK_ACCESS_2_VERTEX_ATTRIBUTE_READ_BIT(0x00000004L),
+        VK_ACCESS_2_UNIFORM_READ_BIT(0x00000008L),
+        VK_ACCESS_2_SHADER_READ_BIT(0x00000020L),
+        VK_ACCESS_2_SHADER_WRITE_BIT(0x00000040L),
+        VK_ACCESS_2_COLOR_ATTACHMENT_READ_BIT(0x00000080L),
+        VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT(0x00000100L),
+        VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT(0x00000200L),
+        VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT(0x00000400L),
+        VK_ACCESS_2_TRANSFER_READ_BIT(0x00000800L),
+        VK_ACCESS_2_TRANSFER_WRITE_BIT(0x00001000L),
+        VK_ACCESS_2_ACCELERATION_STRUCTURE_READ_BIT_KHR(0x00200000L),
+        VK_ACCESS_2_ACCELERATION_STRUCTURE_WRITE_BIT_KHR(0x00400000L);
+
+        private final long value;
+        VkAccessFlags2(long value) { this.value = value; }
+        public long getValue() { return value; }
+    }
+
+    // Vulkan 1.4 Dynamic Rendering Flags
+    public enum VkRenderingFlagsKHR {
+        VK_RENDERING_CONTENTS_SECONDARY_COMMAND_BUFFERS_BIT(0x00000001),
+        VK_RENDERING_SUSPENDING_BIT(0x00000002),
+        VK_RENDERING_RESUMING_BIT(0x00000004);
+
+        private final int value;
+        VkRenderingFlagsKHR(int value) { this.value = value; }
+        public int getValue() { return value; }
+    }
+
     public enum VkFormat {
         VK_FORMAT_R8_UNORM(9, "R8_UNORM"),
         VK_FORMAT_R8_SRGB(15, "R8_SRGB"),
