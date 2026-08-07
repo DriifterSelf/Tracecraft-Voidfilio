@@ -96,6 +96,21 @@ jar {
 
 tasks.named("remapJar") {
     archiveFileName.set("${project.archives_base_name}-${project.version}-fabric-26.2.jar")
+    doLast {
+        def jarFile = archiveFile.get().asFile
+        def zipPath = java.nio.file.Paths.get(jarFile.absolutePath)
+        def fs = java.nio.file.FileSystems.newFileSystem(zipPath, (ClassLoader) null)
+        try {
+            def awPath = fs.getPath("tracecraft.accesswidener")
+            if (java.nio.file.Files.exists(awPath)) {
+                def content = new String(java.nio.file.Files.readAllBytes(awPath), java.nio.charset.StandardCharsets.UTF_8)
+                def updated = content.replaceFirst("accessWidener[ \\t]+v2[ \\t]+(intermediary|named)", "accessWidener v2 official")
+                java.nio.file.Files.write(awPath, updated.getBytes(java.nio.charset.StandardCharsets.UTF_8))
+            }
+        } finally {
+            fs.close()
+        }
+    }
 }
 
 tasks.named("remapSourcesJar") {
