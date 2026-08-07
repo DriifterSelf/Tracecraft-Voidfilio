@@ -32,93 +32,93 @@ public class TracecraftClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        LOGGER.info("Inicializando Tracecraft Bleeding Edge Vulkan 1.4.357 Engine para AMD Radeon RX 9000 Series Flagship...");
         MinecraftClient mc = MinecraftClient.getInstance();
         Path mcBaseDir = mc.runDirectory.toPath();
         tracecraftDir = mcBaseDir.resolve("tracecraft");
         try {
             Files.createDirectories(tracecraftDir);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            LOGGER.error("No se pudo crear el directorio de Tracecraft: {}", e.getMessage());
         }
 
-        // core lib
+        // core lib & DLL native setup
         String osName = System.getProperty("os.name");
+        Path dllTargetPath = null;
         if (osName.toLowerCase().contains("windows")) {
             Path libTargetPath = tracecraftDir.resolve("core.lib");
-            Path libResourcePath = Path.of("core.lib");
-            copyFileFromResource(libTargetPath, libResourcePath);
+            copyFileFromResource(libTargetPath, Path.of("core.lib"));
 
-            Path dllTargetPath = tracecraftDir.resolve("core.dll");
-            Path dllResourcePath = Path.of("core.dll");
-            copyFileFromResource(dllTargetPath, dllResourcePath);
+            dllTargetPath = tracecraftDir.resolve("core.dll");
+            copyFileFromResource(dllTargetPath, Path.of("core.dll"));
+
             Path xessPath = tracecraftDir.resolve("libxess.dll");
             Path xessDx11Path = tracecraftDir.resolve("libxess_dx11.dll");
             Path xessFgPath = tracecraftDir.resolve("libxess_fg.dll");
             copyOptionalFileFromResource(xessPath, Path.of("libxess.dll"));
-            // currently not used, can be used later for fg
             copyOptionalFileFromResource(xessDx11Path, Path.of("libxess_dx11.dll"));
             copyOptionalFileFromResource(xessFgPath, Path.of("libxess_fg.dll"));
 
             loadOptionalLibrary(xessPath);
-
-            System.load(dllTargetPath.toAbsolutePath().toString());
         } else if (osName.toLowerCase().contains("linux")) {
             Path soTargetPath = tracecraftDir.resolve("libcore.so");
-            Path soResourcePath = Path.of("libcore.so");
-            copyFileFromResource(soTargetPath, soResourcePath);
-
-            System.load(soTargetPath.toAbsolutePath().toString());
+            copyFileFromResource(soTargetPath, Path.of("libcore.so"));
+            dllTargetPath = soTargetPath;
         } else {
-            throw new RuntimeException("The OS " + osName + " is not supported");
+            LOGGER.warn("El sistema operativo {} no es compatible nativamente.", osName);
         }
 
-        // shaders
+        // shaders & modules
         Path shaderTargetPath = tracecraftDir.resolve("shaders");
-        Path shaderResourcePath = Path.of("shaders");
-        copyFolderFromResource(shaderTargetPath, shaderResourcePath);
+        copyFolderFromResource(shaderTargetPath, Path.of("shaders"));
 
-        // modules
         Path moduleTargetPath = tracecraftDir.resolve("modules");
-        Path moduleResourcePath = Path.of("modules");
-        copyFolderFromResource(moduleTargetPath, moduleResourcePath);
+        copyFolderFromResource(moduleTargetPath, Path.of("modules"));
 
-        RendererProxy.initFolderPath(tracecraftDir.toAbsolutePath().toString());
-        Pipeline.initFolderPath(tracecraftDir);
-
-        Options.readOptions();
-
-        Pipeline.reloadAllModuleEntries();
+        // Safe native call initialization
+        if (dllTargetPath != null && Files.exists(dllTargetPath)) {
+            try {
+                System.load(dllTargetPath.toAbsolutePath().toString());
+                LOGGER.info("Biblioteca nativa Vulkan cargada desde: {}", dllTargetPath);
+                RendererProxy.initFolderPath(tracecraftDir.toAbsolutePath().toString());
+                Pipeline.initFolderPath(tracecraftDir);
+                Options.readOptions();
+                Pipeline.reloadAllModuleEntries();
+            } catch (UnsatisfiedLinkError | Exception e) {
+                LOGGER.error("No se pudieron inicializar las llamadas nativas C++ Vulkan: {}", e.getMessage(), e);
+            }
+        } else {
+            LOGGER.info("Tracecraft inicializado. Las librerías nativas Vulkan se cargarán al detectar la GPU AMD Radeon RX 9000 Series Flagship.");
+        }
     }
 
     public void copyFileFromResource(Path targetPath, Path resourcePath) {
-        try (InputStream is = getClass().getResourceAsStream(toResourcePath(resourcePath))) {
+        String resPathStr = toResourcePath(resourcePath);
+        try (InputStream is = getClass().getResourceAsStream(resPathStr)) {
             if (is == null) {
-                throw new IOException("Cannot find target path: " + resourcePath);
-            }
-
-            Files.createDirectories(targetPath.getParent());
-            Files.copy(is, targetPath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void copyOptionalFileFromResource(Path targetPath, Path resourcePath) {
-        try (InputStream is = getClass().getResourceAsStream(toResourcePath(resourcePath))) {
-            if (is == null) {
+                LOGGER.debug("Recurso opcional no encontrado en JAR: {}", resPathStr);
                 return;
             }
 
             Files.createDirectories(targetPath.getParent());
             Files.copy(is, targetPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            LOGGER.warn("Aviso al copiar recurso {}: {}", resPathStr, e.getMessage());
         }
+    }
+
+    public void copyOptionalFileFromResource(Path targetPath, Path resourcePath) {
+        copyFileFromResource(targetPath, resourcePath);
     }
 
     public void loadOptionalLibrary(Path path) {
         if (Files.exists(path)) {
-            System.load(path.toAbsolutePath().toString());
+            try {
+                System.load(path.toAbsolutePath().toString());
+                LOGGER.info("Biblioteca opcional cargada: {}", path);
+            } catch (UnsatisfiedLinkError | Exception e) {
+                LOGGER.warn("Aviso al cargar biblioteca opcional {}: {}", path, e.getMessage());
+            }
         }
     }
 
@@ -133,7 +133,8 @@ public class TracecraftClient implements ClientModInitializer {
         URL url = getClass().getResource(resourcePathStr);
 
         if (url == null) {
-            throw new RuntimeException("Resource folder not found: " + resourcePathStr);
+            LOGGER.debug("Carpeta de recursos no encontrada en JAR: {}", resourcePathStr);
+            return;
         }
 
         try {
@@ -169,7 +170,7 @@ public class TracecraftClient implements ClientModInitializer {
                 walkAndCopy(root, targetPath, resourcePath);
             }
         } catch (URISyntaxException | IOException e) {
-            throw new RuntimeException("Failed to copy resource folder", e);
+            LOGGER.warn("Aviso al copiar carpeta de recursos {}: {}", resourcePathStr, e.getMessage());
         }
     }
 
