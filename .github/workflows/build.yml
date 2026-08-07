@@ -26,10 +26,16 @@ jobs:
         shell: powershell
         run: git config --global --add safe.directory '*'
 
-      - name: Set up JDK 25
+      - name: Set up JDK 25 (Toolchain)
         uses: actions/setup-java@v4
         with:
           java-version: '25'
+          distribution: 'temurin'
+
+      - name: Set up JDK 21 (Gradle Runtime)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
           distribution: 'temurin'
 
       - name: Build Mod JAR
