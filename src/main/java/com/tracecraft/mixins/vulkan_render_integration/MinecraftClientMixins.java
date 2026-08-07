@@ -47,28 +47,47 @@ public class MinecraftClientMixins {
     @Redirect(method = "<init>(Lnet/minecraft/client/RunArgs;)V",
         at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;initRenderer(IZ)V"))
     public void initRenderer(int debugVerbosity, boolean debugSync) {
-        long stackSize = 512 * 1024 * 1024; // 32MB
-        Runnable myRunnable = () -> {
-            RendererProxy.initRenderer(window);
-            Pipeline.collectNativeModules();
-        };
-
-        Thread myThread = new Thread(null, myRunnable, "", stackSize);
-        myThread.start();
         try {
-            myThread.join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+            long stackSize = 512 * 1024 * 1024; // 32MB
+            Runnable myRunnable = () -> {
+                try {
+                    RendererProxy.initRenderer(window);
+                    Pipeline.collectNativeModules();
+                } catch (Throwable t) {
+                    com.tracecraft.mixin_related.MixinPlugin.logError("Error en RendererProxy.initRenderer", t);
+                }
+            };
 
-        Pipeline.loadPipeline();
-        Pipeline.build();
+            Thread myThread = new Thread(null, myRunnable, "Tracecraft-Vulkan-Init", stackSize);
+            myThread.start();
+            try {
+                myThread.join();
+            } catch (InterruptedException e) {
+                com.tracecraft.mixin_related.MixinPlugin.logError("Hilo de Vulkan interrumpido", e);
+            }
+
+            try {
+                Pipeline.loadPipeline();
+                Pipeline.build();
+            } catch (Throwable t) {
+                com.tracecraft.mixin_related.MixinPlugin.logError("Error al cargar pipeline Vulkan", t);
+            }
+        } catch (Throwable t) {
+            com.tracecraft.mixin_related.MixinPlugin.logError("Excepción no controlada en initRenderer", t);
+        }
     }
 
     @Redirect(method = "<init>(Lnet/minecraft/client/RunArgs;)V",
         at = @At(value = "NEW", target = "net/minecraft/client/gl/WindowFramebuffer"))
     public WindowFramebuffer cancelNewFramebuffer(int width, int height) {
-        return UnsafeManager.INSTANCE.allocateInstance(WindowFramebuffer.class);
+        try {
+            if (UnsafeManager.INSTANCE != null) {
+                return UnsafeManager.INSTANCE.allocateInstance(WindowFramebuffer.class);
+            }
+        } catch (Throwable t) {
+            com.tracecraft.mixin_related.MixinPlugin.logError("Error asignando WindowFramebuffer con Unsafe", t);
+        }
+        return new WindowFramebuffer(width, height);
     }
 
     @Inject(method = "<init>(Lnet/minecraft/client/RunArgs;)V",
