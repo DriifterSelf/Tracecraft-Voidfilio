@@ -125,3 +125,6 @@ libnvidia-ngx-dlss*
 include/
 shaders/
 libxess*
+
+# Root JSON dumps & cache
+/*.json
