@@ -1,20 +1,12 @@
-﻿<p align="center">
+<p align="center">
   <h1 align="center">Tracecraft (by Voidfilio)</h1>
 </p>
 
-| English | [简体中文](https://github.com/Voidfilio/tracecraft/blob/main/README-CN.md) |
-
 # Tracecraft
 
-**Tracecraft** es un motor de renderizado Vulkan integrado a Minecraft, **construido EXCLUSIVAMENTE para la arquitectura AMD RDNA4**. Creado y mantenido por **Voidfilio**.
+**Tracecraft** es un motor de renderizado Vulkan integrado a Minecraft, **disponible para absolutamente todas las tarjetas gráficas del mercado**. Creado y mantenido por **Voidfilio**.
 
-Haciendo uso intensivo de **FSR4** y estructuras de aceleración de hardware nativas de AMD (OBB, memory fetch específico), este proyecto busca entregar el *Ultimate Path Tracing* a tasas de cuadros inigualables. 
-
-## La Filosofía "Portal RTX"
-
-A diferencia de otros mods genéricos, Tracecraft no bloquea explícitamente a las tarjetas gráficas NVIDIA (RTX) o arquitecturas AMD antiguas. En su lugar, el pipeline está tan fuertemente optimizado para las estructuras de IA (FP8) y de jerarquía BVH de RDNA4, que cualquier otra arquitectura tendrá que emularlo por software. 
-
-**Resultado esperado:** Si intentas correr esto en una RTX 5090, obtendrás menos de 5 FPS. *Así como nos excluyeron con RTX, hoy excluimos con procesamiento real.*
+Haciendo uso intensivo de tecnologías modernas de renderizado, este proyecto busca entregar el *Ultimate Path Tracing* a tasas de cuadros inigualables de manera universal para toda la comunidad. ¡Descárgalo y pruébalo en tu PC, sin importar la marca de tu hardware!
 
 ## Instalación
 
