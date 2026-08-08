@@ -1,12 +1,11 @@
 package com.tracecraft.client.proxy.vulkan;
 
+import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.tracecraft.client.constant.Constants;
 import com.tracecraft.mixin_related.extensions.vulkan_render_integration.INativeImageExt;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.util.Window;
+import net.minecraft.client.Minecraft;
 
 public class RendererProxy {
 
@@ -17,7 +16,7 @@ public class RendererProxy {
     public static void initRenderer(Window window) {
         String mapped = System.mapLibraryName("glfw");
         String[] candidates = {mapped, "libglfw.so.3", "libglfw.3.dylib", "glfw3.dll"};
-        RendererProxy.initRenderer(candidates, window.getHandle());
+        RendererProxy.initRenderer(candidates, window.getWindow());
         RenderSystem.apiDescription = "Vulkan 1.4.357 Bleeding Edge (AMD Radeon RX 9000 Series Flagship Max Performance Engine)";
     }
 
@@ -46,15 +45,15 @@ public class RendererProxy {
         long pointer);
 
     public static NativeImage takeScreenshotWithoutUI() {
-        MinecraftClient mc = MinecraftClient.getInstance();
+        Minecraft mc = Minecraft.getInstance();
         int
             width =
             mc.getWindow()
-                .getWidth();
+                .getScreenWidth();
         int
             height =
             mc.getWindow()
-                .getHeight();
+                .getScreenHeight();
         NativeImage nativeImage = new NativeImage(width, height, false);
         ((INativeImageExt) (Object) nativeImage).tracecraft$loadFromTextureImageWithoutUI(0, true);
         return nativeImage;

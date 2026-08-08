@@ -1,39 +1,24 @@
 package com.tracecraft.client.constant;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.tracecraft.client.vertex.PBRVertexFormats;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderPhase;
-import net.minecraft.client.render.VertexFormat;
+import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.client.renderer.RenderType;
 
 public class Constants {
 
     public enum IndexTypes {
-        SHORT(VertexFormat.IndexType.SHORT, 0),
-        INT(VertexFormat.IndexType.INT, 1);
+        SHORT(0),
+        INT(1);
 
-        private static final Map<VertexFormat.IndexType, Integer>
-            BY_INDEX_TYPE =
-            Collections.unmodifiableMap(Arrays.stream(values())
-                .collect(Collectors.toMap(IndexTypes::getIndexType, IndexTypes::getValue)));
-
-        private final VertexFormat.IndexType indexType;
         private final int value;
 
-        IndexTypes(VertexFormat.IndexType indexType, int value) {
-            this.indexType = indexType;
+        IndexTypes(int value) {
             this.value = value;
-        }
-
-        public static int getValue(VertexFormat.IndexType indexType) {
-            return BY_INDEX_TYPE.get(indexType);
-        }
-
-        public VertexFormat.IndexType getIndexType() {
-            return indexType;
         }
 
         public int getValue() {
@@ -42,34 +27,19 @@ public class Constants {
     }
 
     public enum DrawModes {
-        LINES(VertexFormat.DrawMode.LINES, 0),
-        LINE_STRIP(VertexFormat.DrawMode.LINE_STRIP, 1),
-        DEBUG_LINES(VertexFormat.DrawMode.DEBUG_LINES, 2),
-        DEBUG_LINE_STRIP(VertexFormat.DrawMode.DEBUG_LINE_STRIP, 3),
-        TRIANGLES(VertexFormat.DrawMode.TRIANGLES, 4),
-        TRIANGLE_STRIP(VertexFormat.DrawMode.TRIANGLE_STRIP, 5),
-        TRIANGLE_FAN(VertexFormat.DrawMode.TRIANGLE_FAN, 6),
-        QUADS(VertexFormat.DrawMode.QUADS, 7);
+        LINES(0),
+        LINE_STRIP(1),
+        DEBUG_LINES(2),
+        DEBUG_LINE_STRIP(3),
+        TRIANGLES(4),
+        TRIANGLE_STRIP(5),
+        TRIANGLE_FAN(6),
+        QUADS(7);
 
-        private static final Map<VertexFormat.DrawMode, Integer>
-            BY_DRAW_MODE =
-            Collections.unmodifiableMap(Arrays.stream(values())
-                .collect(Collectors.toMap(DrawModes::getDrawMode, DrawModes::getValue)));
-
-        private final VertexFormat.DrawMode drawMode;
         private final int value;
 
-        DrawModes(VertexFormat.DrawMode drawMode, int value) {
-            this.drawMode = drawMode;
+        DrawModes(int value) {
             this.value = value;
-        }
-
-        public static int getValue(VertexFormat.DrawMode drawMode) {
-            return BY_DRAW_MODE.get(drawMode);
-        }
-
-        public VertexFormat.DrawMode getDrawMode() {
-            return drawMode;
         }
 
         public int getValue() {
@@ -79,24 +49,24 @@ public class Constants {
 
     public enum VertexFormats {
         POSITION_COLOR_TEXTURE_LIGHT_NORMAL(
-            net.minecraft.client.render.VertexFormats.POSITION_COLOR_TEXTURE_LIGHT_NORMAL, 0),
+            com.mojang.blaze3d.vertex.DefaultVertexFormat.BLOCK, 0),
         POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL(
-            net.minecraft.client.render.VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
+            com.mojang.blaze3d.vertex.DefaultVertexFormat.NEW_ENTITY,
             1),
         POSITION_TEXTURE_COLOR_LIGHT(
-            net.minecraft.client.render.VertexFormats.POSITION_TEXTURE_COLOR_LIGHT, 2),
-        POSITION(net.minecraft.client.render.VertexFormats.POSITION, 3),
-        POSITION_COLOR(net.minecraft.client.render.VertexFormats.POSITION_COLOR, 4),
-        LINES(net.minecraft.client.render.VertexFormats.LINES, 5),
-        POSITION_COLOR_LIGHT(net.minecraft.client.render.VertexFormats.POSITION_COLOR_LIGHT, 6),
-        POSITION_TEXTURE(net.minecraft.client.render.VertexFormats.POSITION_TEXTURE, 7),
-        POSITION_TEXTURE_COLOR(net.minecraft.client.render.VertexFormats.POSITION_TEXTURE_COLOR, 8),
+            com.mojang.blaze3d.vertex.DefaultVertexFormat.PARTICLE, 2),
+        POSITION(com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION, 3),
+        POSITION_COLOR(com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_COLOR, 4),
+        LINES(com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_COLOR_NORMAL, 5),
+        POSITION_COLOR_LIGHT(com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_COLOR_LIGHTMAP, 6),
+        POSITION_TEXTURE(com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_TEX, 7),
+        POSITION_TEXTURE_COLOR(com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_TEX_COLOR, 8),
         POSITION_COLOR_TEXTURE_LIGHT(
-            net.minecraft.client.render.VertexFormats.POSITION_COLOR_TEXTURE_LIGHT, 9),
+            com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP, 9),
         POSITION_TEXTURE_LIGHT_COLOR(
-            net.minecraft.client.render.VertexFormats.POSITION_TEXTURE_LIGHT_COLOR, 10),
+            com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR, 10),
         POSITION_TEXTURE_COLOR_NORMAL(
-            net.minecraft.client.render.VertexFormats.POSITION_TEXTURE_COLOR_NORMAL, 11),
+            com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL, 11),
         PBR_TRIANGLE(PBRVertexFormats.PBR_TRIANGLE, 12);
 
         private static final Map<VertexFormat, Integer>
@@ -142,7 +112,7 @@ public class Constants {
             this.value = value;
         }
 
-        public static GeometryTypes getGeometryType(RenderLayer renderLayer, boolean reflect) {
+        public static GeometryTypes getGeometryType(RenderType renderLayer, boolean reflect) {
             // single objects
             if (renderLayer.name.contains("water_mask")) {
                 return BOAT_WATER_MASK;
@@ -160,32 +130,32 @@ public class Constants {
                 return WORLD_NO_REFLECT;
             }
 
-            RenderLayer.MultiPhase multiPhase = (RenderLayer.MultiPhase) renderLayer;
+            RenderType.CompositeRenderType multiPhase = (RenderType.CompositeRenderType) renderLayer;
             if (multiPhase.name.contains("solid")) {
                 // solid
                 return WORLD_SOLID;
             }
 
-            if (multiPhase.isTranslucent()) {
+            if (multiPhase.sortOnUpload()) {
                 // transparent
-                if (RenderPhase.NO_TRANSPARENCY.equals(multiPhase.phases.transparency)) {
+                if (RenderStateShard.NO_TRANSPARENCY.equals(multiPhase.state.transparencyState)) {
                     return WORLD_TRANSPARENT;
-                } else if (RenderPhase.ADDITIVE_TRANSPARENCY.equals(
-                    multiPhase.phases.transparency)) {
+                } else if (RenderStateShard.ADDITIVE_TRANSPARENCY.equals(
+                    multiPhase.state.transparencyState)) {
                     return WORLD_TRANSPARENT;
-                } else if (RenderPhase.LIGHTNING_TRANSPARENCY.equals(
-                    multiPhase.phases.transparency)) {
+                } else if (RenderStateShard.LIGHTNING_TRANSPARENCY.equals(
+                    multiPhase.state.transparencyState)) {
                     return WORLD_TRANSPARENT;
-                } else if (RenderPhase.GLINT_TRANSPARENCY.equals(multiPhase.phases.transparency)) {
+                } else if (RenderStateShard.GLINT_TRANSPARENCY.equals(multiPhase.state.transparencyState)) {
                     return WORLD_TRANSPARENT;
-                } else if (RenderPhase.CRUMBLING_TRANSPARENCY.equals(
-                    multiPhase.phases.transparency)) {
+                } else if (RenderStateShard.CRUMBLING_TRANSPARENCY.equals(
+                    multiPhase.state.transparencyState)) {
                     return WORLD_TRANSPARENT;
-                } else if (RenderPhase.OVERLAY_TRANSPARENCY.equals(
-                    multiPhase.phases.transparency)) {
+                } else if (RenderStateShard.OVERLAY_TRANSPARENCY.equals(
+                    multiPhase.state.transparencyState)) {
                     return WORLD_TRANSPARENT;
-                } else if (RenderPhase.TRANSLUCENT_TRANSPARENCY.equals(
-                    multiPhase.phases.transparency)) {
+                } else if (RenderStateShard.TRANSLUCENT_TRANSPARENCY.equals(
+                    multiPhase.state.transparencyState)) {
                     return WORLD_TRANSPARENT;
                 } else {
                     throw new IllegalArgumentException("Invalid render layer " + multiPhase);

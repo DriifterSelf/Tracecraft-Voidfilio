@@ -2,13 +2,13 @@ package com.tracecraft.client.proxy.vulkan;
 
 import static org.lwjgl.system.MemoryUtil.memAddress;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import com.tracecraft.client.constant.VulkanConstants;
 import com.tracecraft.client.option.Options;
 import com.tracecraft.client.texture.EmissionRecorder;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import net.minecraft.client.texture.NativeImage;
 import org.lwjgl.system.MemoryUtil;
 
 public class TextureProxy {
@@ -122,7 +122,7 @@ public class TextureProxy {
         }
     }
 
-    public static void prepareImage(NativeImage.InternalFormat internalFormat, int id,
+    public static void prepareImage(NativeImage.InternalGlFormat internalFormat, int id,
         int mipLevels, int width, int height) {
         switch (internalFormat) {
             case RGBA:

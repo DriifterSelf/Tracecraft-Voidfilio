@@ -1,7 +1,7 @@
 package com.tracecraft.mixin_related.extensions.vanilla_resource_tracker;
 
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.util.Identifier;
+import com.mojang.blaze3d.platform.NativeImage;
+import net.minecraft.resources.ResourceLocation;
 
 public interface INativeImageExt {
 
@@ -9,9 +9,9 @@ public interface INativeImageExt {
 
     void tracecraft$setTargetID(int id);
 
-    Identifier tracecraft$getIdentifier();
+    ResourceLocation tracecraft$getIdentifier();
 
-    void tracecraft$setIdentifier(Identifier id);
+    void tracecraft$setIdentifier(ResourceLocation id);
 
     NativeImage tracecraft$getSpecularNativeImage();
 

@@ -1,5 +1,6 @@
 package com.tracecraft.client.texture;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.tracecraft.client.proxy.vulkan.TextureProxy;
 import com.tracecraft.mixin_related.extensions.vanilla_resource_tracker.INativeImageExt;
@@ -14,11 +15,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.atlas.AtlasSource;
-import net.minecraft.resource.Resource;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.texture.atlas.SpriteSource;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
 
 public enum AuxiliaryTextures {
     SPECULAR("specular", "_s", (identifier, source) -> {
@@ -31,7 +31,7 @@ public enum AuxiliaryTextures {
 
         pathComponents[pathComponents.length - 1] = specularFileName;
         String specularPath = String.join("/", pathComponents);
-        Identifier specularIdentifier = Identifier.of(namespace, specularPath);
+        ResourceLocation specularIdentifier = ResourceLocation.fromNamespaceAndPath(namespace, specularPath);
         return List.of(specularIdentifier);
     }, INativeImageExt::tracecraft$getSpecularNativeImage,
         INativeImageExt::tracecraft$setSpecularNativeImage, source -> 0,
@@ -46,11 +46,11 @@ public enum AuxiliaryTextures {
 
         pathComponents[pathComponents.length - 1] = normalFileName;
         String normalPath = String.join("/", pathComponents);
-        Identifier normalIdentifier = Identifier.of(namespace, normalPath);
+        ResourceLocation normalIdentifier = ResourceLocation.fromNamespaceAndPath(namespace, normalPath);
         return List.of(normalIdentifier);
     }, INativeImageExt::tracecraft$getNormalNativeImage,
         INativeImageExt::tracecraft$setNormalNativeImage,
-        source -> source.getFormat().hasAlpha() ? 255 << source.getFormat().getAlphaOffset() : 0,
+        source -> source.format().hasAlpha() ? 255 << source.format().alphaOffset() : 0,
         TextureTracker.GLID2NormalGLID),
     FLAG(
         "flag", "_f", (identifier, source) -> {
@@ -64,7 +64,7 @@ public enum AuxiliaryTextures {
         pathComponents[pathComponents.length - 1] = flagFileName;
         String flagPath = String.join("/", pathComponents)
             .replace("textures/", "textures/flag/");
-        Identifier flagIdentifier = Identifier.of(namespace, flagPath);
+        ResourceLocation flagIdentifier = ResourceLocation.fromNamespaceAndPath(namespace, flagPath);
         return List.of(flagIdentifier);
     }, INativeImageExt::tracecraft$getFlagNativeImage,
         INativeImageExt::tracecraft$setFlagNativeImage, source -> 0,
@@ -94,7 +94,7 @@ public enum AuxiliaryTextures {
         this.GLIDMapping = GLIDMapping;
     }
 
-    public static boolean isAuxiliaryTexture(Identifier identifier) {
+    public static boolean isAuxiliaryTexture(ResourceLocation identifier) {
         if (identifier == null) {
             return false;
         }
@@ -107,16 +107,16 @@ public enum AuxiliaryTextures {
     }
 
     public static boolean shouldSkipAtlasSprite(ResourceManager resourceManager,
-        Identifier spriteId) {
+        ResourceLocation spriteId) {
         String spritePath = spriteId.getPath();
         for (AuxiliaryTextures auxiliaryTexture : ALL_TEXTURES) {
             if (!auxiliaryTexture.matchesSuffix(spritePath)) {
                 continue;
             }
 
-            Identifier baseSpriteId = auxiliaryTexture.toBaseSpriteId(spriteId);
+            ResourceLocation baseSpriteId = auxiliaryTexture.toBaseSpriteId(spriteId);
             if (resourceManager.getResource(
-                    AtlasSource.RESOURCE_FINDER.toResourcePath(baseSpriteId))
+                    SpriteSource.TEXTURE_ID_CONVERTER.idToFile(baseSpriteId))
                 .isPresent()) {
                 return true;
             }
@@ -145,7 +145,7 @@ public enum AuxiliaryTextures {
         int offsetX, int offsetY, int unpackSkipPixels, int unpackSkipRows, int regionWidth,
         int regionHeight, boolean blur) {
         int targetId = sourceExt.tracecraft$getTargetID();
-        Identifier identifier = sourceExt.tracecraft$getIdentifier();
+        ResourceLocation identifier = sourceExt.tracecraft$getIdentifier();
 
         if (identifier != null) {
             if (isAuxiliaryTexture(identifier)) {
@@ -191,7 +191,7 @@ public enum AuxiliaryTextures {
                         auxiliaryTemplateImage = preparedLevelCopy;
                     } else {
                         int defaultValue = auxiliaryTexture.defaultValueProvider.get(source);
-                        auxiliaryTemplateImage = source.applyToCopy(i -> defaultValue);
+                        auxiliaryTemplateImage = source.mappedCopy(i -> defaultValue);
                     }
                 }
 
@@ -212,7 +212,7 @@ public enum AuxiliaryTextures {
 
                     if (auxiliaryImage.getWidth() != source.getWidth()
                         || auxiliaryImage.getHeight() != source.getHeight()
-                        || auxiliaryImage.getFormat() != source.getFormat()) {
+                        || auxiliaryImage.format() != source.format()) {
                         throw new RuntimeException(
                             auxiliaryTexture.name + " image size / format mismatch");
                     }
@@ -246,12 +246,12 @@ public enum AuxiliaryTextures {
         return path.endsWith(suffix);
     }
 
-    private Identifier toBaseSpriteId(Identifier spriteId) {
+    private ResourceLocation toBaseSpriteId(ResourceLocation spriteId) {
         String spritePath = spriteId.getPath();
         return spriteId.withPath(spritePath.substring(0, spritePath.length() - suffix.length()));
     }
 
-    private CacheKey toBaseCacheKey(Identifier auxiliaryIdentifier) {
+    private CacheKey toBaseCacheKey(ResourceLocation auxiliaryIdentifier) {
         String path = auxiliaryIdentifier.getPath();
         if (this == FLAG) {
             path = path.replaceFirst("^textures/flag/", "textures/");
@@ -263,29 +263,29 @@ public enum AuxiliaryTextures {
             throw new IllegalArgumentException("Unexpected auxiliary path: " + auxiliaryIdentifier);
         }
         baseName = baseName.substring(0, baseName.length() - suffix.length());
-        return new CacheKey(this, Identifier.of(auxiliaryIdentifier.getNamespace(),
+        return new CacheKey(this, ResourceLocation.fromNamespaceAndPath(auxiliaryIdentifier.getNamespace(),
             baseName + path.substring(dotIndex)));
     }
 
-    private CacheEntry getPreparedEntry(Identifier identifier) {
+    private CacheEntry getPreparedEntry(ResourceLocation identifier) {
         return DECODED_IMAGE_CACHE.getOrDefault(new CacheKey(this, identifier), CacheEntry.MISSING);
     }
 
-    private NativeImage copyPreparedImage(Identifier identifier, int level) {
+    private NativeImage copyPreparedImage(ResourceLocation identifier, int level) {
         synchronized (DECODED_IMAGE_CACHE_LOCK) {
             NativeImage preparedLevel = this.getPreparedEntry(identifier).getImage(level);
             if (preparedLevel == null) {
                 return null;
             }
 
-            NativeImage copied = new NativeImage(preparedLevel.getFormat(),
+            NativeImage copied = new NativeImage(preparedLevel.format(),
                 preparedLevel.getWidth(), preparedLevel.getHeight(), false);
             copied.copyFrom(preparedLevel);
             return copied;
         }
     }
 
-    private static AuxiliaryTextures classifyAuxiliaryResource(Identifier id) {
+    private static AuxiliaryTextures classifyAuxiliaryResource(ResourceLocation id) {
         String path = id.getPath();
         if (!path.endsWith(".png")) {
             return null;
@@ -305,10 +305,10 @@ public enum AuxiliaryTextures {
     public static CompletableFuture<PreparedImages> prepareDecodedImagesAsync(
         ResourceManager resourceManager, Executor prepareExecutor) {
         List<CompletableFuture<DecodedEntry>> futures = new ArrayList<>();
-        Map<Identifier, Resource> resources = resourceManager.findResources("textures",
+        Map<ResourceLocation, Resource> resources = resourceManager.listResources("textures",
             id -> classifyAuxiliaryResource(id) != null);
 
-        for (Map.Entry<Identifier, Resource> entry : resources.entrySet()) {
+        for (Map.Entry<ResourceLocation, Resource> entry : resources.entrySet()) {
             AuxiliaryTextures auxiliaryTexture = classifyAuxiliaryResource(entry.getKey());
             if (auxiliaryTexture == null) {
                 continue;
@@ -331,7 +331,7 @@ public enum AuxiliaryTextures {
     }
 
     private static DecodedEntry decodePreparedEntry(CacheKey cacheKey, Resource resource) {
-        try (InputStream inputStream = resource.getInputStream()) {
+        try (InputStream inputStream = resource.open()) {
             NativeImage image = NativeImage.read(inputStream);
             NativeImage[] levels = MipmapUtil.buildMipmapChain(image);
             return new DecodedEntry(cacheKey, new CacheEntry(levels));
@@ -359,7 +359,7 @@ public enum AuxiliaryTextures {
             || path.startsWith("textures/flag/entity/");
     }
 
-    private record CacheKey(AuxiliaryTextures texture, Identifier identifier) {}
+    private record CacheKey(AuxiliaryTextures texture, ResourceLocation identifier) {}
 
     private static final class CacheEntry {
 
@@ -406,7 +406,7 @@ public enum AuxiliaryTextures {
 
     public interface IdentifierCandidateProvider {
 
-        List<Identifier> get(Identifier identifier, NativeImage source);
+        List<ResourceLocation> get(ResourceLocation identifier, NativeImage source);
     }
 
     public interface Getter {

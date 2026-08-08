@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.17.18'
+    id 'net.fabricmc.fabric-loom' version '1.17.18'
     id 'maven-publish'
 }
 
@@ -42,10 +42,9 @@ repositories {
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     // https://mvnrepository.com/artifact/org.yaml/snakeyaml
     implementation "org.yaml:snakeyaml:2.5"
@@ -54,13 +53,13 @@ dependencies {
 
 processResources {
     inputs.property "version", project.version
-    inputs.property "minecraft_version", ">=1.21.4"
+    inputs.property "minecraft_version", ">=26.2"
     inputs.property "loader_version", project.loader_version
     filteringCharset "UTF-8"
 
     filesMatching("fabric.mod.json") {
         expand "version": project.version,
-                "minecraft_version": ">=1.21.4",
+                "minecraft_version": ">=26.2",
                 "loader_version": project.loader_version
     }
 }
@@ -68,7 +67,7 @@ processResources {
 // Toolchain: Gradle descargará Java 25 automáticamente si no está instalado (via Foojay/Adoptium)
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(26)
     }
     // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
     // if it is present.
@@ -82,7 +81,7 @@ tasks.withType(JavaCompile).configureEach {
     // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
     // If Javadoc is generated, this must be specified in that task too.
     it.options.encoding = "UTF-8"
-    it.options.release.set(25)
+    it.options.release.set(26)
 }
 
 jar {
@@ -91,28 +90,7 @@ jar {
     }
 }
 
-tasks.named("remapJar") {
-    archiveFileName.set("${project.archives_base_name}-${project.version}-fabric-26.2.jar")
-    doLast {
-        def jarFile = archiveFile.get().asFile
-        def zipPath = java.nio.file.Paths.get(jarFile.absolutePath)
-        def fs = java.nio.file.FileSystems.newFileSystem(zipPath, (ClassLoader) null)
-        try {
-            def awPath = fs.getPath("tracecraft.accesswidener")
-            if (java.nio.file.Files.exists(awPath)) {
-                def content = new String(java.nio.file.Files.readAllBytes(awPath), java.nio.charset.StandardCharsets.UTF_8)
-                def updated = content.replaceFirst("accessWidener[ \\t]+v2[ \\t]+(intermediary|named)", "accessWidener v2 official")
-                java.nio.file.Files.write(awPath, updated.getBytes(java.nio.charset.StandardCharsets.UTF_8))
-            }
-        } finally {
-            fs.close()
-        }
-    }
-}
 
-tasks.named("remapSourcesJar") {
-    archiveFileName.set("${project.archives_base_name}-${project.version}-fabric-26.2-sources.jar")
-}
 
 // configure the maven publication
 publishing {

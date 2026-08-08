@@ -1,12 +1,12 @@
 package com.tracecraft.mixins.vulkan_render_integration;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.tracecraft.client.proxy.vulkan.RendererProxy;
 import com.tracecraft.client.proxy.vulkan.TextureProxy;
 import com.tracecraft.client.texture.AuxiliaryTextures;
 import com.tracecraft.mixin_related.extensions.vanilla_resource_tracker.INativeImageExt;
 import java.util.function.IntUnaryOperator;
-import net.minecraft.client.texture.NativeImage;
 import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,11 +20,11 @@ public abstract class NativeImageMixins implements
     com.tracecraft.mixin_related.extensions.vulkan_render_integration.INativeImageExt {
 
     @Shadow
-    private long pointer;
+    private long pixels;
 
     @Final
     @Shadow
-    private long sizeBytes;
+    private long size;
 
     @Final
     @Shadow
@@ -39,12 +39,12 @@ public abstract class NativeImageMixins implements
     private int height;
 
     @Shadow
-    public abstract NativeImage applyToCopy(IntUnaryOperator operator);
+    public abstract NativeImage mappedCopy(IntUnaryOperator operator);
 
     @Shadow
-    public abstract NativeImage.Format getFormat();
+    public abstract NativeImage.Format format();
 
-    @Inject(method = "uploadInternal(IIIIIIIZ)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/texture/NativeImage;checkAllocated()V", shift = At.Shift.AFTER), cancellable = true)
+    @Inject(method = "_upload(IIIIIIIZ)V", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/NativeImage;checkAllocated()V", shift = At.Shift.AFTER), cancellable = true)
     public void redirectUploadInternal(int level, int offsetX, int offsetY, int unpackSkipPixels,
         int unpackSkipRows, int regionWidth, int regionHeight, boolean blur, CallbackInfo ci) {
         try {
@@ -54,7 +54,7 @@ public abstract class NativeImageMixins implements
             AuxiliaryTextures.loadAndUpload((NativeImage) (Object) this, self, level, offsetX,
                 offsetY, unpackSkipPixels, unpackSkipRows, regionWidth, regionHeight, blur);
 
-            TextureProxy.queueUpload(pointer, (int) sizeBytes, width, targetId, unpackSkipPixels,
+            TextureProxy.queueUpload(pixels, (int) size, width, targetId, unpackSkipPixels,
                 unpackSkipRows, offsetX, offsetY, regionWidth, regionHeight, level);
         } finally {
             if (blur) {
@@ -85,7 +85,7 @@ public abstract class NativeImageMixins implements
     public NativeImage tracecraft$alignTo(NativeImage source) {
         int targetWidth = source.getWidth();
         int targetHeight = source.getHeight();
-        NativeImage.Format targetFormat = source.getFormat();
+        NativeImage.Format targetFormat = source.format();
 
         if (width == targetWidth && height == targetHeight && format == targetFormat) {
             return (NativeImage) (Object) this;
@@ -93,8 +93,8 @@ public abstract class NativeImageMixins implements
 
         NativeImage dest = new NativeImage(targetFormat, targetWidth, targetHeight, false);
 
-        int srcChannels = this.format.getChannelCount();
-        int destChannels = targetFormat.getChannelCount();
+        int srcChannels = this.format.components();
+        int destChannels = targetFormat.components();
         int commonChannels = Math.min(srcChannels, destChannels);
 
         for (int y = 0; y < targetHeight; y++) {
@@ -103,7 +103,7 @@ public abstract class NativeImageMixins implements
                 int sampleY = (y < this.height) ? y : (y % this.height);
 
                 long srcPixelPtr =
-                    this.pointer + (sampleX + (long) sampleY * this.width) * srcChannels;
+                    this.pixels + (sampleX + (long) sampleY * this.width) * srcChannels;
                 long destPixelPtr =
                     ((com.tracecraft.mixin_related.extensions.vulkan_render_integration.INativeImageExt) (Object) dest).tracecraft$getPointer()
                         + (long) (x + (long) y * targetWidth) * destChannels;
@@ -125,7 +125,7 @@ public abstract class NativeImageMixins implements
 
     @Override
     public long tracecraft$getPointer() {
-        return pointer;
+        return pixels;
     }
 
     @Shadow
@@ -138,24 +138,24 @@ public abstract class NativeImageMixins implements
     public abstract int getHeight();
 
     @Shadow
-    protected abstract int getColor(int x, int y);
+    protected abstract int getPixelABGR(int x, int y);
 
     @Shadow
-    protected abstract void setColor(int x, int y, int color);
+    protected abstract void setPixelABGR(int x, int y, int color);
 
     @Shadow
     public abstract void close();
 
-    @Inject(method = "loadFromTextureImage(IZ)V", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "downloadTexture(IZ)V", at = @At(value = "HEAD"), cancellable = true)
     public void redirectLoadFromTextureImage(int level, boolean removeAlpha, CallbackInfo ci) {
         RenderSystem.assertOnRenderThread();
         this.checkAllocated();
-        RendererProxy.takeScreenshot(true, this.width, this.height, this.format.getChannelCount(),
-            this.pointer);
+        RendererProxy.takeScreenshot(true, this.width, this.height, this.format.components(),
+            this.pixels);
         if (removeAlpha && this.format.hasAlpha()) {
             for (int i = 0; i < this.getHeight(); i++) {
                 for (int j = 0; j < this.getWidth(); j++) {
-                    this.setColor(j, i, this.getColor(j, i) | 255 << this.format.getAlphaOffset());
+                    this.setPixelABGR(j, i, this.getPixelABGR(j, i) | 255 << this.format.alphaOffset());
                 }
             }
         }
@@ -166,12 +166,12 @@ public abstract class NativeImageMixins implements
     public void tracecraft$loadFromTextureImageWithoutUI(int level, boolean removeAlpha) {
         RenderSystem.assertOnRenderThread();
         this.checkAllocated();
-        RendererProxy.takeScreenshot(false, this.width, this.height, this.format.getChannelCount(),
-            this.pointer);
+        RendererProxy.takeScreenshot(false, this.width, this.height, this.format.components(),
+            this.pixels);
         if (removeAlpha && this.format.hasAlpha()) {
             for (int i = 0; i < this.getHeight(); i++) {
                 for (int j = 0; j < this.getWidth(); j++) {
-                    this.setColor(j, i, this.getColor(j, i) | 255 << this.format.getAlphaOffset());
+                    this.setPixelABGR(j, i, this.getPixelABGR(j, i) | 255 << this.format.alphaOffset());
                 }
             }
         }

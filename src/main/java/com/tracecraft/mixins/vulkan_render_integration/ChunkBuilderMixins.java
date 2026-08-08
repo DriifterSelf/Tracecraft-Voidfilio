@@ -1,40 +1,40 @@
 package com.tracecraft.mixins.vulkan_render_integration;
 
 import com.tracecraft.mixin_related.extensions.vulkan_render_integration.IChunkBuilderExt;
-import net.minecraft.client.render.chunk.BlockBufferAllocatorStorage;
-import net.minecraft.client.render.chunk.ChunkBuilder;
-import net.minecraft.client.render.chunk.SectionBuilder;
-import net.minecraft.client.world.ClientWorld;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.SectionBufferBuilderPack;
+import net.minecraft.client.renderer.chunk.SectionCompiler;
+import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(ChunkBuilder.class)
+@Mixin(SectionRenderDispatcher.class)
 public class ChunkBuilderMixins implements IChunkBuilderExt {
 
     @Final
     @Shadow
-    SectionBuilder sectionBuilder;
+    SectionCompiler sectionCompiler;
 
     @Final
     @Shadow
-    BlockBufferAllocatorStorage buffers;
+    SectionBufferBuilderPack fixedBuffers;
 
     @Shadow
-    ClientWorld world;
+    ClientLevel level;
 
     @Override
-    public SectionBuilder tracecraft$getSectionBuilder() {
-        return sectionBuilder;
+    public SectionCompiler tracecraft$getSectionBuilder() {
+        return sectionCompiler;
     }
 
     @Override
-    public ClientWorld tracecraft$getWorld() {
-        return world;
+    public ClientLevel tracecraft$getWorld() {
+        return level;
     }
 
     @Override
-    public BlockBufferAllocatorStorage tracecraft$getBuffers() {
-        return buffers;
+    public SectionBufferBuilderPack tracecraft$getBuffers() {
+        return fixedBuffers;
     }
 }

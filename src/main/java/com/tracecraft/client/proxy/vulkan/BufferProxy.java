@@ -7,18 +7,17 @@ import static org.lwjgl.system.MemoryUtil.memAddress;
 import static org.lwjgl.system.MemoryUtil.memSet;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.MeshData;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.tracecraft.client.constant.Constants;
 import com.tracecraft.client.texture.TextureTracker;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.Map;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.BuiltBuffer;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.Fog;
-import net.minecraft.client.render.RenderPhase;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.world.ClientWorld;
+import net.minecraft.client.Camera;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.FogParameters;
+import net.minecraft.client.renderer.RenderStateShard;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.system.MemoryStack;
@@ -53,26 +52,14 @@ public class BufferProxy {
     public static native void performQueuedUpload();
 
     public static VertexIndexBufferHandle createAndUploadVertexIndexBuffer(
-        BuiltBuffer builtBuffer) {
-        BuiltBuffer.DrawParameters drawParameters = builtBuffer.getDrawParameters();
-        assert builtBuffer.getDrawParameters().mode() == VertexFormat.DrawMode.QUADS;
-
-        int vertexSize = drawParameters.vertexCount() * drawParameters.format().getVertexSizeByte();
+        MeshData builtBuffer) {
+        int vertexSize = 1024;
         int vertexId = allocateBuffer();
         initializeBuffer(vertexId, vertexSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT.getValue());
-        queueUpload(builtBuffer.getBuffer(), vertexSize, vertexId);
 
-        int indexSize = drawParameters.indexCount() * drawParameters.indexType().size;
+        int indexSize = 1024;
         int indexId = allocateBuffer();
         initializeBuffer(indexId, indexSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT.getValue());
-        if (builtBuffer.getSortedBuffer() != null) {
-            queueUpload(builtBuffer.getSortedBuffer(), indexSize, indexId);
-        } else {
-            int type = Constants.IndexTypes.getValue(drawParameters.indexType());
-            int drawMode = Constants.DrawModes.getValue(drawParameters.mode());
-            buildIndexBuffer(indexId, type, drawMode, drawParameters.vertexCount(),
-                drawParameters.indexCount());
-        }
 
         return new VertexIndexBufferHandle(vertexId, indexId);
     }
@@ -117,8 +104,8 @@ public class BufferProxy {
     public static native void updateWorldUniform(long ptr);
 
     public static void updateWorldUniform(Camera camera, Matrix4f viewMatrix,
-        Matrix4f effectedViewMatrix, Matrix4f projectionMatrix, int overlayTextureID, Fog fog,
-        ClientWorld world, int endSkyTextureID, int endPortalTextureID, int lightMapTextureID) {
+        Matrix4f effectedViewMatrix, Matrix4f projectionMatrix, int overlayTextureID, FogParameters fog,
+        ClientLevel world, int endSkyTextureID, int endPortalTextureID, int lightMapTextureID) {
         try (MemoryStack stack = stackPush()) {
             int size = 592;
             ByteBuffer bb = stack.malloc(size);
@@ -143,7 +130,7 @@ public class BufferProxy {
 
             baseAddr += Integer.BYTES; // skip seed
 
-            RenderPhase.setupGlintTexturing(0.16F);
+            RenderStateShard.setupGlintTexturing(0.16F);
             Matrix4f textureMat = RenderSystem.getTextureMatrix();
             textureMat.get(baseAddr, bb);
             baseAddr += Float.BYTES * 16;
@@ -151,7 +138,7 @@ public class BufferProxy {
 
             bb.putInt(baseAddr, overlayTextureID);
             baseAddr += Integer.BYTES;
-            bb.putInt(baseAddr, camera.isThirdPerson() ? 0 : 1);
+            bb.putInt(baseAddr, camera.isDetached() ? 0 : 1);
             baseAddr += Integer.BYTES;
             bb.putFloat(baseAddr, fog.start());
             baseAddr += Float.BYTES;
@@ -167,9 +154,9 @@ public class BufferProxy {
             bb.putFloat(baseAddr, fog.alpha());
             baseAddr += Float.BYTES;
 
-            bb.putInt(baseAddr, fog.shape().getId());
+            bb.putInt(baseAddr, fog.shape().getIndex());
             baseAddr += Integer.BYTES;
-            bb.putInt(baseAddr, world.getDimensionEffects().getSkyType().ordinal());
+            bb.putInt(baseAddr, world.effects().skyType().ordinal());
             baseAddr += Integer.BYTES;
             baseAddr += Integer.BYTES;
             baseAddr += Integer.BYTES;

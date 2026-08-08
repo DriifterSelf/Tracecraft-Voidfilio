@@ -1,14 +1,14 @@
 package com.tracecraft.mixin_related.extensions.vulkan_render_integration;
 
-import net.minecraft.client.render.chunk.BlockBufferAllocatorStorage;
-import net.minecraft.client.render.chunk.SectionBuilder;
-import net.minecraft.client.world.ClientWorld;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.SectionBufferBuilderPack;
+import net.minecraft.client.renderer.chunk.SectionCompiler;
 
 public interface IChunkBuilderExt {
 
-    SectionBuilder tracecraft$getSectionBuilder();
+    SectionCompiler tracecraft$getSectionBuilder();
 
-    ClientWorld tracecraft$getWorld();
+    ClientLevel tracecraft$getWorld();
 
-    BlockBufferAllocatorStorage tracecraft$getBuffers();
+    SectionBufferBuilderPack tracecraft$getBuffers();
 }

@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import net.fabricmc.api.ClientModInitializer;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import org.slf4j.Logger;
 
 public class TracecraftClient implements ClientModInitializer {
@@ -35,8 +35,8 @@ public class TracecraftClient implements ClientModInitializer {
     public void onInitializeClient() {
         MixinPlugin.log("Inicializando Tracecraft Client Mod...");
         try {
-            MinecraftClient mc = MinecraftClient.getInstance();
-            Path mcBaseDir = mc.runDirectory != null ? mc.runDirectory.toPath() : Paths.get(System.getProperty("user.dir"));
+            Minecraft mc = Minecraft.getInstance();
+            Path mcBaseDir = mc.gameDirectory != null ? mc.gameDirectory.toPath() : Paths.get(System.getProperty("user.dir"));
             tracecraftDir = mcBaseDir.resolve("tracecraft");
             try {
                 Files.createDirectories(tracecraftDir);
