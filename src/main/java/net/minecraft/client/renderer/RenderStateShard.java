@@ -1,37 +1,22 @@
 package net.minecraft.client.renderer;
 
-public abstract class RenderStateShard {
-    protected final String name;
-    private final Runnable setupState;
-    private final Runnable clearState;
+import java.util.Optional;
+import net.minecraft.resources.ResourceLocation;
 
-    public static final TransparencyStateShard NO_TRANSPARENCY = new TransparencyStateShard("no_transparency");
-    public static final TransparencyStateShard ADDITIVE_TRANSPARENCY = new TransparencyStateShard("additive_transparency");
-    public static final TransparencyStateShard LIGHTNING_TRANSPARENCY = new TransparencyStateShard("lightning_transparency");
-    public static final TransparencyStateShard GLINT_TRANSPARENCY = new TransparencyStateShard("glint_transparency");
-    public static final TransparencyStateShard CRUMBLING_TRANSPARENCY = new TransparencyStateShard("crumbling_transparency");
-    public static final TransparencyStateShard OVERLAY_TRANSPARENCY = new TransparencyStateShard("overlay_transparency");
-    public static final TransparencyStateShard TRANSLUCENT_TRANSPARENCY = new TransparencyStateShard("translucent_transparency");
+public class RenderStateShard {
+    public static Object NO_TRANSPARENCY = new Object();
+    public static Object ADDITIVE_TRANSPARENCY = new Object();
+    public static Object LIGHTNING_TRANSPARENCY = new Object();
+    public static Object GLINT_TRANSPARENCY = new Object();
+    public static Object CRUMBLING_TRANSPARENCY = new Object();
+    public static Object OVERLAY_TRANSPARENCY = new Object();
+    public static Object TRANSLUCENT_TRANSPARENCY = new Object();
 
-    public static class TransparencyStateShard extends RenderStateShard {
-        public TransparencyStateShard(String name) {
-            super(name, () -> {}, () -> {});
-        }
+    public Object transparencyState = new Object();
+
+    public static class TextureStateShard {
+        public Optional<ResourceLocation> cutoutTexture() { return Optional.empty(); }
     }
 
-    public static void setupGlintTexturing(float speed) {}
-
-    public RenderStateShard(String name, Runnable setupState, Runnable clearState) {
-        this.name = name;
-        this.setupState = setupState;
-        this.clearState = clearState;
-    }
-
-    public void setupRenderState() {
-        setupState.run();
-    }
-
-    public void clearRenderState() {
-        clearState.run();
-    }
+    public TextureStateShard textureState = new TextureStateShard();
 }

@@ -1,5 +1,9 @@
 package com.mojang.blaze3d.platform;
 
 public class TextureUtil {
-    public static void prepareImage(Object p1, int p2, int p3, int p4, int p5) {}
+    public static int generateTextureId() { return 1; }
+    public static void prepareImage(Object internalGlFormat, int id, int maxLevel, int width, int height) {}
+    public static void prepareImage(Object internalGlFormat, int id, int width, int height) {}
+    public static void prepareImage(int id, int maxLevel, int width, int height) {}
+    public static void prepareImage(int id, int width, int height) {}
 }

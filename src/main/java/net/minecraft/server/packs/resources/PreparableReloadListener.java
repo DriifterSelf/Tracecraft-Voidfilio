@@ -4,9 +4,16 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 public interface PreparableReloadListener {
-    interface SharedState {}
-    interface PreparationBarrier {
+    public interface PreparationBarrier {
         <T> CompletableFuture<T> wait(T value);
     }
-    CompletableFuture<Void> reload(PreparationBarrier barrier, Object manager, Executor prepareExecutor, Executor applyExecutor);
+
+    CompletableFuture<Void> reload(PreparationBarrier barrier, ResourceManager resourceManager, Executor backgroundExecutor, Executor gameExecutor);
+    
+    default CompletableFuture<Void> reload(PreparationBarrier barrier, Object resourceManager, Executor backgroundExecutor, Executor gameExecutor) {
+        if (resourceManager instanceof ResourceManager rm) {
+            return reload(barrier, rm, backgroundExecutor, gameExecutor);
+        }
+        return CompletableFuture.completedFuture(null);
+    }
 }

@@ -24,6 +24,10 @@ public class Constants {
         public int getValue() {
             return value;
         }
+
+        public static int getValue(Object type) {
+            return 0;
+        }
     }
 
     public enum DrawModes {
@@ -44,6 +48,10 @@ public class Constants {
 
         public int getValue() {
             return value;
+        }
+
+        public static int getValue(Object mode) {
+            return 7;
         }
     }
 

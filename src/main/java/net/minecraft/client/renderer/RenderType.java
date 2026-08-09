@@ -1,83 +1,25 @@
 package net.minecraft.client.renderer;
 
-public class RenderType extends RenderStateShard {
-    public final String name;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
-    public static class TextureState {
-        public Object cutoutTexture() { return null; }
-    }
-
-    public static class CompositeState {
-        public RenderStateShard.TransparencyStateShard transparencyState = RenderStateShard.NO_TRANSPARENCY;
-        public TextureState textureState = new TextureState();
-    }
-
-    public boolean isOutline() {
-        return false;
-    }
-
-    public java.util.Optional<RenderType> outline() {
-        return java.util.Optional.empty();
-    }
-
+public class RenderType {
+    public String name = "";
     public static class CompositeRenderType extends RenderType {
-        public final CompositeState state = new CompositeState();
-
-        public CompositeRenderType(String name) {
-            super(name);
-        }
-
-        public boolean sortOnUpload() {
-            return false;
-        }
+        public RenderStateShard state = new RenderStateShard();
+        public boolean sortOnUpload() { return false; }
     }
 
-    public RenderType(String name) {
-        super(name, () -> {}, () -> {});
-        this.name = name;
-    }
+    public int bufferSize() { return 65536; }
+    public boolean affectsCrumbling() { return false; }
+    public boolean isOutline() { return false; }
+    public Optional<RenderType> outline() { return Optional.empty(); }
 
-    public String mode() {
-        return "QUADS";
-    }
-
-    public boolean affectsCrumbling() {
-        return false;
-    }
-
-    public static RenderType gui() {
-        return new RenderType("gui");
-    }
-
-    public static RenderType guiTextured() {
-        return new RenderType("gui_textured");
-    }
-
-    public static java.util.List<RenderType> chunkBufferLayers() {
-        return java.util.Collections.emptyList();
-    }
-
-    public int bufferSize() {
-        return 0;
-    }
-
-    public static RenderType lines() {
-        return new RenderType("lines");
-    }
-
-    public static RenderType secondaryBlockOutline() {
-        return new RenderType("secondary_block_outline");
-    }
-
-    public static RenderType entityCutout(net.minecraft.resources.ResourceLocation location) {
-        return new RenderType("entity_cutout");
-    }
-
-    public static RenderType entitySolid(net.minecraft.resources.ResourceLocation location) {
-        return new RenderType("entity_solid");
-    }
-
-    public static RenderType entityTranslucent(net.minecraft.resources.ResourceLocation location) {
-        return new RenderType("entity_translucent");
-    }
+    public static List<RenderType> chunkBufferLayers() { return Collections.emptyList(); }
+    public static RenderType clouds() { return new RenderType(); }
+    public static RenderType flatClouds() { return new RenderType(); }
+    public static RenderType entitySolid(Object location) { return new RenderType(); }
+    public static RenderType secondaryBlockOutline() { return new RenderType(); }
+    public static RenderType lines() { return new RenderType(); }
 }

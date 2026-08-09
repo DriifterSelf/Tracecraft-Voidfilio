@@ -1,15 +1,11 @@
 package com.mojang.blaze3d.systems;
 
-import org.joml.Matrix4f;
+import net.minecraft.client.renderer.CompiledShaderProgram;
 
 public class RenderSystem {
-    public static String apiDescription = "";
-
-    public static float getShaderGameTime() { return 0.0f; }
-    public static Matrix4f getTextureMatrix() { return new Matrix4f(); }
-    public static void resetTextureMatrix() {}
-    public static void assertOnRenderThread() {}
+    public static void setShaderTexture(int unit, Object location) {}
+    public static CompiledShaderProgram getShader() { return new CompiledShaderProgram(); }
     public static void assertOnRenderThreadOrInit() {}
-    public static void assertOnGameThreadOrInit() {}
-    public static int getShaderTexture(Integer slot) { return 0; }
+    public static boolean isOnRenderThreadOrInit() { return true; }
+    public static void recordRenderCall(Runnable runnable) {}
 }

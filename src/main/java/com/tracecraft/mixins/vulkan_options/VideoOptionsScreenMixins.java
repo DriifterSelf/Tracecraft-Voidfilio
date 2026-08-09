@@ -29,6 +29,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(VideoSettingsScreen.class)
 public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
 
+    private static Component genericValueLabel(Component optionText, Component valueText) {
+        return optionText;
+    }
+
     @Unique
     private static final Component INACTIVITY_FPS_LIMIT_MINIMIZED_TOOLTIP = Component.translatable(
         "options.inactivityFpsLimit.minimized.tooltip");

@@ -9,26 +9,46 @@ public class ResourceLocation {
         this.path = path;
     }
 
-    public static ResourceLocation parse(String location) {
-        String[] split = location.split(":", 2);
-        if (split.length == 2) {
-            return new ResourceLocation(split[0], split[1]);
+    public ResourceLocation(String location) {
+        String[] parts = location.split(":", 2);
+        if (parts.length > 1) {
+            this.namespace = parts[0];
+            this.path = parts[1];
+        } else {
+            this.namespace = "minecraft";
+            this.path = parts[0];
         }
-        return new ResourceLocation("minecraft", location);
     }
 
-    public static ResourceLocation withDefaultNamespace(String path) {
-        return new ResourceLocation("minecraft", path);
+    public static ResourceLocation parse(String location) {
+        return new ResourceLocation(location);
     }
 
     public static ResourceLocation fromNamespaceAndPath(String namespace, String path) {
         return new ResourceLocation(namespace, path);
     }
 
-    public ResourceLocation withPath(String newPath) {
-        return new ResourceLocation(this.namespace, newPath);
+    public static ResourceLocation withDefaultNamespace(String path) {
+        return new ResourceLocation("minecraft", path);
     }
 
-    public String getNamespace() { return namespace; }
-    public String getPath() { return path; }
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public ResourceLocation withPrefix(String prefix) {
+        return new ResourceLocation(namespace, prefix + path);
+    }
+
+    public ResourceLocation withSuffix(String suffix) {
+        return new ResourceLocation(namespace, path + suffix);
+    }
+
+    public ResourceLocation withPath(String newPath) {
+        return new ResourceLocation(namespace, newPath);
+    }
 }

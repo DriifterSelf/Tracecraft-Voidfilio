@@ -1,21 +1,27 @@
 package com.mojang.blaze3d.vertex;
 
-import java.util.stream.Stream;
+import java.util.Collections;
+import java.util.List;
 
 public class VertexFormatElement {
+    public static Object POSITION = new Object();
+
     public enum Type {
         FLOAT, UINT, INT, SHORT, USHORT, BYTE, UBYTE
     }
 
     public enum Usage {
-        GENERIC, POSITION, NORMAL, COLOR, UV
+        POSITION, NORMAL, COLOR, UV, GENERIC
     }
 
-    public static VertexFormatElement register(int id, int index, Type type, Usage usage, int count) {
+    public int id() { return 0; }
+    public int mask() { return 1; }
+
+    public static VertexFormatElement register(int id, int index, Object type, Object usage, int count) {
         return new VertexFormatElement();
     }
 
-    public int mask() { return 1; }
-    public int id() { return 0; }
-    public static Stream<VertexFormatElement> elementsFromMask(int mask) { return Stream.empty(); }
+    public static List<VertexFormatElement> elementsFromMask(int mask) {
+        return Collections.emptyList();
+    }
 }
