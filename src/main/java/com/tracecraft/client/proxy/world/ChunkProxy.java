@@ -258,13 +258,7 @@ public class ChunkProxy {
         Vec3 vec3d = chunkBuilder.getCameraPosition();
         // TODO: cancel out the sort operation in section builder
         VertexSorting
-            vertexSorter =
-            VertexSorting.byDistance((float) (vec3d.x - builtChunk.getOrigin()
-                    .getX()),
-                (float) (vec3d.y - builtChunk.getOrigin()
-                    .getY()),
-                (float) (vec3d.z - builtChunk.getOrigin()
-                    .getZ()));
+            vertexSorter = vecs -> null;
 
         SectionCompiler.Results renderData =
             ((IChunkBuilderExt) chunkBuilder).tracecraft$getSectionBuilder()

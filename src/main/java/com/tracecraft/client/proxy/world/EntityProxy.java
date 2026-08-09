@@ -280,17 +280,14 @@ public class EntityProxy {
 
             MultiBufferSource vertexConsumerProvider;
             if (canDrawEntityOutlines && client.shouldEntityAppearGlowing(entity)) {
-//                 TODO: add outline
-//                StorageOutlineVertexConsumerProvider
-//                    outlineVertexConsumerProvider =
-//                    new StorageOutlineVertexConsumerProvider(entityStorageVertexConsumerProvider);
-//                vertexConsumerProvider = outlineVertexConsumerProvider;
-//                int color = entity.getTeamColorValue();
-//                outlineVertexConsumerProvider.setColor(ColorHelper.getRed(color),
-//                                                       ColorHelper.getGreen(color),
-//                                                       ColorHelper.getBlue(color),
-//                                                       255);
-                vertexConsumerProvider = entityStorageVertexConsumerProvider;
+                StorageOutlineVertexConsumerProvider outlineVertexConsumerProvider =
+                    new StorageOutlineVertexConsumerProvider(entityStorageVertexConsumerProvider);
+                vertexConsumerProvider = outlineVertexConsumerProvider;
+                int color = entity.getTeamColor();
+                outlineVertexConsumerProvider.setColor(ARGB.red(color),
+                                                       ARGB.green(color),
+                                                       ARGB.blue(color),
+                                                       255);
             } else {
                 vertexConsumerProvider = entityStorageVertexConsumerProvider;
             }
