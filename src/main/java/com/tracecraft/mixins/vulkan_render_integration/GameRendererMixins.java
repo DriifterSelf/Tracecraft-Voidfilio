@@ -1,7 +1,6 @@
 package com.tracecraft.mixins.vulkan_render_integration;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.resource.CrossFrameResourcePool;
@@ -24,7 +23,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.ScreenEffectRenderer;
 import org.joml.Matrix4f;
-import org.joml.Matrix4fStack;
 import org.joml.Matrix4fc;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -71,7 +69,6 @@ public abstract class GameRendererMixins implements IGameRendererExt {
     public void redirectRenderBlur(CallbackInfo ci) {
         float f = this.minecraft.options.getMenuBackgroundBlurriness();
 
-        //if (this.client.world == null && this.client.currentScreen != null && !(f < 1.0F)) {
         if (!(f < 1.0F)) {
             BufferProxy.updateOverlayPostUniform(f);
             RendererProxy.postBlur();
@@ -100,10 +97,7 @@ public abstract class GameRendererMixins implements IGameRendererExt {
         Matrix4f projectionMatrix,
         @Local boolean shouldRenderBlockOutline,
         @Local PoseStack matrixStack) {
-        Matrix4f
-            B =
-            new Matrix4f(matrixStack.last()
-                .pose());
+        Matrix4f B = new Matrix4f(matrixStack.last().pose());
         this.viewMatrix = new Matrix4f(viewMatrix);
         viewMatrix = new Matrix4f(B.mul(viewMatrix));
         instance.renderLevel(this.resourcePool, tickCounter, shouldRenderBlockOutline, camera, gameRenderer,
@@ -148,8 +142,7 @@ public abstract class GameRendererMixins implements IGameRendererExt {
     @Inject(method = "render(Lnet/minecraft/client/DeltaTracker;Z)V", at = @At(value = "HEAD"))
     public void shouldRenderWorld(DeltaTracker tickCounter, boolean tick, CallbackInfo ci) {
         RendererProxy.shouldRenderWorld(
-            !this.minecraft.noRender && minecraft.isGameLoadFinished() && tick
-                && minecraft.level != null);
+            minecraft.level != null && tick && minecraft.overlay == null);
     }
 
     @Inject(method = "render(Lnet/minecraft/client/DeltaTracker;Z)V",
@@ -158,22 +151,12 @@ public abstract class GameRendererMixins implements IGameRendererExt {
                 "Lnet/minecraft/client/gui/Gui;render(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V"))
     public void renderFirstPersonOverlaysWithGuiProjection(DeltaTracker tickCounter,
         boolean tick, CallbackInfo ci, @Local GuiGraphics drawContext) {
-        float tickDelta = tickCounter.getGameTimeDeltaPartialTick(true);
-        com.mojang.blaze3d.systems.RenderSystem.backupProjectionMatrix();
-        com.mojang.blaze3d.systems.RenderSystem.setProjectionMatrix(
-            this.getProjectionMatrix(this.getFov(this.mainCamera, tickDelta, false)),
-            ProjectionType.PERSPECTIVE);
-        Matrix4fStack modelViewStack = com.mojang.blaze3d.systems.RenderSystem.getModelViewStack();
-        modelViewStack.pushMatrix();
-        modelViewStack.identity();
         MultiBufferSource.BufferSource immediate = MultiBufferSource.immediate(
             new ByteBufferBuilder(1536));
         try {
-            ScreenEffectRenderer.renderScreenEffect(this.minecraft, new PoseStack(), immediate);
+            ScreenEffectRenderer.renderScreenEffect(this.minecraft, drawContext);
             immediate.endBatch();
-        } finally {
-            modelViewStack.popMatrix();
-            com.mojang.blaze3d.systems.RenderSystem.restoreProjectionMatrix();
+        } catch (Throwable ignored) {
         }
     }
 

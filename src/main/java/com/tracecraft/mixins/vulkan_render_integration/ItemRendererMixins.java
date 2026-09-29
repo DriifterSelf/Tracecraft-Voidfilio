@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 import com.tracecraft.client.vertex.PBRVertexConsumer;
+import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -19,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class ItemRendererMixins {
 
     @Inject(method =
-        "getArmorFoilBuffer(Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/renderer/RenderType;Z)Lcom/mojang/blaze3d/vertex/VertexConsumer;", at = @At(value = "HEAD"), cancellable = true)
+        "getArmorFoilBuffer(Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/renderer/RenderType;Z)Lcom/mojang.blaze3d.vertex.VertexConsumer;", at = @At(value = "HEAD"), cancellable = true)
     private static void redirectGetArmorGlintConsumer(MultiBufferSource provider,
         RenderType layer,
         boolean glint,
@@ -29,14 +30,14 @@ public class ItemRendererMixins {
         if (vertexConsumer instanceof PBRVertexConsumer pbrVertexConsumer) {
             if (glint) {
                 cir.setReturnValue(new PBRVertexConsumer.GLint(pbrVertexConsumer,
-                    RenderType.armorEntityGlint()));
+                    RenderType.entityGlint()));
             } else {
                 cir.setReturnValue(vertexConsumer);
             }
         } else {
             if (glint) {
                 cir.setReturnValue(
-                    VertexMultiConsumer.create(provider.getBuffer(RenderType.armorEntityGlint()),
+                    VertexMultiConsumer.create(provider.getBuffer(RenderType.entityGlint()),
                         vertexConsumer));
             } else {
                 cir.setReturnValue(vertexConsumer);
@@ -54,11 +55,11 @@ public class ItemRendererMixins {
 
         if (vertexConsumer instanceof PBRVertexConsumer pbrVertexConsumer) {
             cir.setReturnValue(
-                new PBRVertexConsumer.GLintOverlay(pbrVertexConsumer, RenderType.glint(), entry,
+                new PBRVertexConsumer.GLintOverlay(pbrVertexConsumer, RenderType.entityGlint(), entry,
                     0.0078125F));
         } else {
             cir.setReturnValue(VertexMultiConsumer.create(
-                new SheetedDecalTextureGenerator(provider.getBuffer(RenderType.glint()),
+                new SheetedDecalTextureGenerator(provider.getBuffer(RenderType.entityGlint()),
                     entry,
                     0.0078125F), vertexConsumer));
         }
@@ -74,15 +75,14 @@ public class ItemRendererMixins {
         boolean glint,
         CallbackInfoReturnable<VertexConsumer> cir) {
         VertexConsumer vertexConsumer = vertexConsumers.getBuffer(layer);
+        boolean fabulous = Minecraft.getInstance().options.graphicsMode().get() == GraphicsStatus.FABULOUS;
 
         if (vertexConsumer instanceof PBRVertexConsumer pbrVertexConsumer) {
             if (glint) {
-                RenderType
-                    glintRenderLayer =
-                    Minecraft.useShaderTransparency()
-                        && layer == Sheets.translucentItemSheet() ?
+                RenderType glintRenderLayer =
+                    fabulous && layer == Sheets.translucentItemSheet() ?
                         RenderType.glintTranslucent()
-                        : (solid ? RenderType.glint() : RenderType.entityGlint());
+                        : (solid ? RenderType.entityGlint() : RenderType.entityGlint());
 
                 cir.setReturnValue(
                     new PBRVertexConsumer.GLint(pbrVertexConsumer, glintRenderLayer));
@@ -92,13 +92,11 @@ public class ItemRendererMixins {
         } else {
             if (glint) {
                 cir.setReturnValue(
-                    Minecraft.useShaderTransparency()
-                        && layer == Sheets.translucentItemSheet() ?
+                    fabulous && layer == Sheets.translucentItemSheet() ?
                         VertexMultiConsumer.create(
                             vertexConsumers.getBuffer(RenderType.glintTranslucent()),
                             vertexConsumer) :
-                        VertexMultiConsumer.create(vertexConsumers.getBuffer(
-                                solid ? RenderType.glint() : RenderType.entityGlint()),
+                        VertexMultiConsumer.create(vertexConsumers.getBuffer(RenderType.entityGlint()),
                             vertexConsumer));
             } else {
                 cir.setReturnValue(vertexConsumer);

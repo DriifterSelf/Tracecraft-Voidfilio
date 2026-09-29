@@ -60,14 +60,14 @@ public abstract class HeldItemRendererMixins implements IHeldItemRendererExt {
         float h = Mth.lerp(tickDelta, player.xBobO, player.xBob);
         float i = Mth.lerp(tickDelta, player.yBobO, player.yBob);
         matrices.mulPose(
-            Axis.XP.rotationDegrees((player.getViewXRot(tickDelta) - h) * 0.1F));
+            Axis.XP.rotationDegrees((player.getXRot(tickDelta) - h) * 0.1F));
         matrices.mulPose(
-            Axis.YP.rotationDegrees((player.getViewYRot(tickDelta) - i) * 0.1F));
+            Axis.YP.rotationDegrees((player.getYRot(tickDelta) - i) * 0.1F));
         if (handRenderType.renderMainHand) {
             float j = hand == InteractionHand.MAIN_HAND ? f : 0.0F;
             float k = 1.0F - Mth.lerp(tickDelta, this.oMainHandHeight,
                 this.mainHandHeight);
-            this.renderArmWithItem(player, tickDelta, g, InteractionHand.MAIN_HAND, j, this.mainHandItem, k,
+            this.renderArmWithItem((AbstractClientPlayer) player, tickDelta, g, InteractionHand.MAIN_HAND, j, this.mainHandItem, k,
                 matrices, vertexConsumers, light);
         }
 
@@ -75,7 +75,7 @@ public abstract class HeldItemRendererMixins implements IHeldItemRendererExt {
             float j = hand == InteractionHand.OFF_HAND ? f : 0.0F;
             float k = 1.0F - Mth.lerp(tickDelta, this.oOffHandHeight,
                 this.offHandHeight);
-            this.renderArmWithItem(player, tickDelta, g, InteractionHand.OFF_HAND, j, this.offHandItem, k,
+            this.renderArmWithItem((AbstractClientPlayer) player, tickDelta, g, InteractionHand.OFF_HAND, j, this.offHandItem, k,
                 matrices, vertexConsumers, light);
         }
     }

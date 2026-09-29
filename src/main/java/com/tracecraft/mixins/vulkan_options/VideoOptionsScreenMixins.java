@@ -1,6 +1,5 @@
 package com.tracecraft.mixins.vulkan_options;
 
-import static net.minecraft.client.Options.genericValueLabel;
 import static net.minecraft.client.InactivityFpsLimit.AFK;
 
 import com.google.common.collect.ImmutableList;
@@ -12,7 +11,6 @@ import com.tracecraft.client.gui.PotentialValuesBasedCallbacksNoValue;
 import com.tracecraft.client.gui.RenderPipelineScreen;
 import com.tracecraft.client.option.Options;
 import com.tracecraft.client.util.CategoryVideoOptionEntry;
-import java.util.Arrays;
 import java.util.Optional;
 import net.minecraft.client.InactivityFpsLimit;
 import net.minecraft.client.Minecraft;
@@ -29,8 +27,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(VideoSettingsScreen.class)
 public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
 
+    @Unique
     private static Component genericValueLabel(Component optionText, Component valueText) {
-        return optionText;
+        return Component.translatable("options.generic_value", optionText, valueText);
     }
 
     @Unique
@@ -47,9 +46,8 @@ public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
 
     @Inject(method = "addOptions()V", at = @At(value = "HEAD"), cancellable = true)
     public void redirectAddOptions(CallbackInfo ci) {
-        OptionInstance<Integer>
-            maxFps =
-            new OptionInstance<>("options.framerateLimit",
+        OptionInstance<Integer> maxFps =
+            new OptionInstance<Integer>("options.framerateLimit",
                 OptionInstance.noTooltip(),
                 (optionText, value) -> value == 260 ?
                     genericValueLabel(optionText, Component.translatable("options.framerateLimit.max"))
@@ -67,25 +65,18 @@ public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
                     Options.setMaxFps(value, true);
                 });
 
-        int i = -1;
-        Window
-            window =
-            Minecraft.getInstance()
-                .getWindow();
+        Window window = Minecraft.getInstance().getWindow();
         Monitor monitor = window.findBestMonitor();
         int j;
         if (monitor == null) {
             j = -1;
         } else {
             Optional<VideoMode> optional = window.getPreferredFullscreenVideoMode();
-            j =
-                optional.map(monitor::getVideoModeIndex)
-                    .orElse(-1);
+            j = optional.map(monitor::getVideoModeIndex).orElse(-1);
         }
 
-        OptionInstance<Integer>
-            fullScreenResolutionOption =
-            new OptionInstance<>("options.fullscreen.resolution", OptionInstance.noTooltip(),
+        OptionInstance<Integer> fullScreenResolutionOption =
+            new OptionInstance<Integer>("options.fullscreen.resolution", OptionInstance.noTooltip(),
                 (optionText, value) -> {
                     if (monitor == null) {
                         return Component.translatable("options.fullscreen.unavailable");
@@ -110,20 +101,12 @@ public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
                 }
             });
 
-        OptionInstance<InactivityFpsLimit> inactivityFpsLimit = new OptionInstance<>(
+        OptionInstance<InactivityFpsLimit> inactivityFpsLimit = OptionInstance.createEnum(
             "options.inactivityFpsLimit",
-            option -> {
-                return switch (option) {
-                    case MINIMIZED -> Tooltip.create(
-                        INACTIVITY_FPS_LIMIT_MINIMIZED_TOOLTIP);
-                    case AFK -> Tooltip.create(INACTIVITY_FPS_LIMIT_AFK_TOOLTIP);
-                };
+            option -> switch (option) {
+                case MINIMIZED -> Tooltip.create(INACTIVITY_FPS_LIMIT_MINIMIZED_TOOLTIP);
+                case AFK -> Tooltip.create(INACTIVITY_FPS_LIMIT_AFK_TOOLTIP);
             },
-            OptionInstance.forOptionEnum(),
-            new OptionInstance.Enum<>(Arrays.asList(
-                InactivityFpsLimit.values()),
-                InactivityFpsLimit.CODEC),
-            AFK,
             inactivityLimit -> {
                 Options.setInactivityFpsLimit(
                     inactivityLimit == AFK ? 30 : 9, true);
@@ -131,15 +114,13 @@ public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
 
         OptionInstance<Boolean> enableVsync = OptionInstance.createBoolean("options.vsync", Options.vsync,
             value -> {
-                if (Minecraft.getInstance()
-                    .getWindow() != null) {
+                if (Minecraft.getInstance().getWindow() != null) {
                     Options.setVsync(value, true);
                 }
             });
 
-        OptionInstance<Integer>
-            chunkBuildingBatchSize =
-            new OptionInstance<>(Options.CHUNK_BUILDING_BATCH_SIZE_KEY,
+        OptionInstance<Integer> chunkBuildingBatchSize =
+            new OptionInstance<Integer>(Options.CHUNK_BUILDING_BATCH_SIZE_KEY,
                 OptionInstance.noTooltip(),
                 (optionText, value) -> genericValueLabel(optionText,
                     Component.literal(Integer.toString(value))),
@@ -150,9 +131,8 @@ public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
                     Options.setChunkBuildingBatchSize(value, true);
                 });
 
-        OptionInstance<Integer>
-            chunkBuildingTotalBatches =
-            new OptionInstance<>(Options.CHUNK_BUILDING_TOTAL_BATCHES_KEY,
+        OptionInstance<Integer> chunkBuildingTotalBatches =
+            new OptionInstance<Integer>(Options.CHUNK_BUILDING_TOTAL_BATCHES_KEY,
                 OptionInstance.noTooltip(),
                 (optionText, value) -> genericValueLabel(optionText,
                     Component.literal(Integer.toString(value))),
@@ -163,9 +143,8 @@ public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
                     Options.setChunkBuildingTotalBatches(value, true);
                 });
 
-        OptionInstance<Integer>
-            chunkBuildingThreads =
-            new OptionInstance<>(Options.CHUNK_BUILDING_THREADS_KEY, OptionInstance.noTooltip(),
+        OptionInstance<Integer> chunkBuildingThreads =
+            new OptionInstance<Integer>(Options.CHUNK_BUILDING_THREADS_KEY, OptionInstance.noTooltip(),
                 (optionText, value) -> genericValueLabel(optionText,
                     Component.literal(Integer.toString(value))),
                 new OptionInstance.IntRange(1,
@@ -179,7 +158,7 @@ public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
             Options.collectChunkEmission,
             value -> Options.setCollectChunkEmission(value, true));
 
-        OptionInstance<Boolean> pipelineSettings = new OptionInstance<>(Options.PIPELINE_SETUP_KEY,
+        OptionInstance<Boolean> pipelineSettings = new OptionInstance<Boolean>(Options.PIPELINE_SETUP_KEY,
             OptionInstance.noTooltip(),
             (optionText, value) -> optionText,
             BOOLEAN_NO_KEY,
@@ -192,23 +171,23 @@ public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
         // Adding categories and options
         this.list.addEntry(
             new CategoryVideoOptionEntry(Component.translatable(Options.CATEGORY_GAMEPLAY), list));
-        OptionInstance[] optionsGameplay = new OptionInstance[]{ //
-            options.graphicsMode(), //
-            options.renderDistance(), //
-            options.simulationDistance(), //
-            options.guiScale(), //
-            options.attackIndicator(), //
-            options.gamma(), //
-            options.cloudStatus(), //
-            options.particles(), //
-            options.screenEffectScale(), //
-            options.entityDistanceScaling(), //
-            options.fovEffectScale(), //
-            options.showAutosaveIndicator(), //
-            options.glintSpeed(), //
-            options.glintStrength(), //
-            options.menuBackgroundBlurriness(), //
-            options.bobView(), //
+        OptionInstance<?>[] optionsGameplay = new OptionInstance<?>[]{
+            options.graphicsMode(),
+            options.renderDistance(),
+            options.simulationDistance(),
+            options.guiScale(),
+            options.attackIndicator(),
+            options.gamma(),
+            options.cloudStatus(),
+            options.particles(),
+            options.screenEffectScale(),
+            options.entityDistanceScaling(),
+            options.fovEffectScale(),
+            options.showAutosaveIndicator(),
+            options.glintSpeed(),
+            options.glintStrength(),
+            options.menuBackgroundBlurriness(),
+            options.bobView(),
         };
         this.list.addBig(options.biomeBlendRadius());
         this.list.addBig(options.mipmapLevels());
@@ -216,11 +195,11 @@ public class VideoOptionsScreenMixins extends GameOptionsScreenMixins {
 
         this.list.addEntry(
             new CategoryVideoOptionEntry(Component.translatable(Options.CATEGORY_WINDOW), list));
-        OptionInstance[] optionsWindow = new OptionInstance[]{ //
-            maxFps, //
-            inactivityFpsLimit, //
-            enableVsync, //
-            options.fullscreen(), //
+        OptionInstance<?>[] optionsWindow = new OptionInstance<?>[]{
+            maxFps,
+            inactivityFpsLimit,
+            enableVsync,
+            options.fullscreen(),
         };
         this.list.addSmall(optionsWindow);
         this.list.addBig(fullScreenResolutionOption);

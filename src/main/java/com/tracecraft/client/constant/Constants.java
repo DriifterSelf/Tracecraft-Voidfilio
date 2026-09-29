@@ -59,7 +59,7 @@ public class Constants {
         POSITION_COLOR_TEXTURE_LIGHT_NORMAL(
             com.mojang.blaze3d.vertex.DefaultVertexFormat.BLOCK, 0),
         POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL(
-            com.mojang.blaze3d.vertex.DefaultVertexFormat.NEW_ENTITY,
+            com.mojang.blaze3d.vertex.DefaultVertexFormat.ENTITY,
             1),
         POSITION_TEXTURE_COLOR_LIGHT(
             com.mojang.blaze3d.vertex.DefaultVertexFormat.PARTICLE, 2),

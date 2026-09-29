@@ -12,6 +12,7 @@ import net.minecraft.client.OptionInstance.TooltipSupplier;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public record PotentialValuesBasedCallbacksNoValue<T>(List<T> values, Codec<T> codec) implements
@@ -31,7 +32,7 @@ public record PotentialValuesBasedCallbacksNoValue<T>(List<T> values, Codec<T> c
     public Function<OptionInstance<T>, AbstractWidget> createButton(
         TooltipSupplier<T> tooltipFactory, Options gameOptions, int x, int y, int width,
         Consumer<T> changeCallback) {
-        return option -> CycleButton.<T>builder(val -> Component.literal(String.valueOf(val)))
+        return option -> CycleButton.builder((T val) -> Component.literal(String.valueOf(val)))
             .withValues(this.valueListSupplier())
             .withTooltip(tooltipFactory)
             .withInitialValue(option.get())

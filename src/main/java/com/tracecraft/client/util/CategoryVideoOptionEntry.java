@@ -16,14 +16,16 @@ public class CategoryVideoOptionEntry extends OptionsList.Entry {
         this.text = text;
     }
 
-    public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float partialTick) {}
+    public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float partialTick) {
+        if (guiGraphics != null && text != null) {
+            guiGraphics.drawCenteredString(net.minecraft.client.Minecraft.getInstance().font, this.text, left + width / 2, top + 5, 0xFFFFFF);
+        }
+    }
 
-    @Override
     public List<? extends GuiEventListener> children() {
         return Collections.emptyList();
     }
 
-    @Override
     public List<? extends NarratableEntry> narratables() {
         return Collections.emptyList();
     }

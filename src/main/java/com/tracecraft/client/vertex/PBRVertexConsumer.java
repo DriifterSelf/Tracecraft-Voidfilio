@@ -308,6 +308,7 @@ public class PBRVertexConsumer implements VertexConsumer {
             String
                 s =
                 VertexFormatElement.elementsFromMask(currentMask)
+                    .stream()
                     .map(format::getElementName)
                     .collect(Collectors.joining(", "));
             throw new IllegalStateException("Missing elements in vertex: " + s);

@@ -5,6 +5,7 @@ import com.tracecraft.client.pipeline.config.AttributeConfig;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Predicate;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
@@ -146,7 +147,7 @@ final class AttributeWidgetUtil {
         EditBox tf = new EditBox(textRenderer, 0, 0, width, 20, Component.empty());
         tf.setMaxLength(64);
         tf.setValue(cfg.value == null ? "" : cfg.value);
-        tf.setFilter(s -> s.isEmpty() || s.equals("-") || s.matches("-?\\d+"));
+        tf.setFilter((Predicate<String>) s -> s.isEmpty() || s.equals("-") || s.matches("-?\\d+"));
         tf.setResponder(text -> {
             if (isStrictInt(text)) {
                 cfg.value = text;
@@ -160,7 +161,7 @@ final class AttributeWidgetUtil {
         EditBox tf = new EditBox(textRenderer, 0, 0, width, 20, Component.empty());
         tf.setMaxLength(64);
         tf.setValue(cfg.value == null ? "" : cfg.value);
-        tf.setFilter(
+        tf.setFilter((Predicate<String>) 
             s -> s.isEmpty() || s.equals("-") || s.equals(".") || s.equals("-.") || s.matches(
                 "-?\\d+")
                 || s.matches("-?\\d+\\.") || s.matches("-?\\d*\\.\\d+"));
@@ -215,7 +216,7 @@ final class AttributeWidgetUtil {
         EditBox tf = new EditBox(textRenderer, 0, 0, width, 20, Component.empty());
         tf.setMaxLength(32);
         tf.setValue(trimFloat(v));
-        tf.setFilter(
+        tf.setFilter((Predicate<String>) 
             s -> s.isEmpty() || s.equals("-") || s.equals(".") || s.equals("-.") || s.matches(
                 "-?\\d+")
                 || s.matches("-?\\d+\\.") || s.matches("-?\\d*\\.\\d+"));

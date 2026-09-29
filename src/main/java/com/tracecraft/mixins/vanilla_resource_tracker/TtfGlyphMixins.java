@@ -1,12 +1,12 @@
 package com.tracecraft.mixins.vanilla_resource_tracker;
 
 import com.mojang.blaze3d.font.SheetGlyphInfo;
-import com.mojang.blaze3d.font.TrueTypeGlyphProvider;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.tracecraft.mixin_related.extensions.vanilla_resource_tracker.INativeImageExt;
 import com.tracecraft.mixin_related.extensions.vanilla_resource_tracker.IRenderableGlyphExt;
 import java.util.function.Function;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
+import net.minecraft.client.gui.font.providers.TrueTypeGlyphProvider;
 import org.lwjgl.util.freetype.FT_Face;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(TrueTypeGlyphProvider.Glyph.class)
 public class TtfGlyphMixins {
 
-    @Shadow
+    @Shadow(aliases = {"this$0", "field_2336"})
     @Final
     TrueTypeGlyphProvider field_2336;
 
@@ -86,7 +86,7 @@ public class TtfGlyphMixins {
             public void upload(int id, int x, int y) {
                 NativeImage nativeImage = new NativeImage(NativeImage.Format.LUMINANCE, width,
                     height, false);
-                FT_Face fT_Face = field_2336.validateFontOpen();
+                FT_Face fT_Face = (FT_Face) (Object) field_2336.validateFontOpen();
                 if (nativeImage.copyFromFont(fT_Face, index)) {
                     ((INativeImageExt) (Object) nativeImage).tracecraft$setTargetID(id);
                     nativeImage.upload(0, x, y, 0, 0, width, height, true);
